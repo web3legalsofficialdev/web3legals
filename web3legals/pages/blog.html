@@ -136,6 +136,25 @@
 </style>
 
 <script>
+/* ─── API CONFIG ────────────────────────────────────────────── */
+const BLOG_API = ''; // Auto-detects: same origin as blog page
+
+/* ─── FETCH POSTS FROM D1 VIA WORKER API ────────────────────── */
+async function fetchPostsFromAPI() {
+  try {
+    const base = 'https://web3legals-api.web3legalsofficialdev.workers.dev'; // Cloudflare Worker API
+    const r = await fetch(base + '/api/posts');
+    if (!r.ok) return null;
+    const posts = await r.json();
+    if (posts && posts.length) {
+      // Cache in localStorage for instant load next time
+      try { localStorage.setItem('w3l_posts', JSON.stringify(posts)); } catch(e) {}
+      return posts;
+    }
+    return null;
+  } catch(e) { return null; }
+}
+
 /* ─── HARDCODED ARTICLES (legacy format) ──────────────────── */
 const ARTICLES = [
   {slug:'mica-2024-guide',emoji:'🇪🇺',cat:'MiCA',date:'Dec 2024',title:'MiCA 2024: The Complete Guide for Crypto Businesses Entering the EU',excerpt:'The EU\'s Markets in Crypto-Assets Regulation is the world\'s most comprehensive crypto rulebook. Here\'s everything your business needs to know.',readTime:'10 min',body:`<h2>MiCA 2024: Complete Guide</h2><p>The Markets in Crypto-Assets Regulation (MiCA) officially entered full force in December 2024, establishing the European Union as the world's most regulated — and arguably most predictable — crypto jurisdiction.</p><h3>What MiCA Covers</h3><p>MiCA creates a unified licensing regime for crypto-asset service providers (CASPs) across all 27 EU member states. The regulation covers three categories of crypto assets: asset-referenced tokens (ARTs), e-money tokens (EMTs), and "other" crypto assets (including utility tokens and most cryptocurrencies).</p><h3>Who Needs a MiCA Licence?</h3><p>Any entity providing crypto-asset services in the EU — including exchanges, custodians, portfolio managers, advisors, and transfer services — must obtain CASP authorisation from their national competent authority (NCA). The "passport" then allows operation across all EU states.</p><h3>Timeline & Compliance Costs</h3><p>Existing crypto firms operating in the EU under national regimes were granted an 18-month transition period (ending mid-2026 for most states). New entrants must apply before operating. Authorisation typically takes 3–6 months and costs between €50,000–€500,000 depending on jurisdiction and firm size.</p><h3>Key Obligations</h3><ul style="color:var(--white-muted);padding-left:1.5rem;margin:1rem 0;"><li>Whitepapers for asset issuance</li><li>Ongoing disclosure requirements</li><li>Reserve requirements for ARTs and EMTs</li><li>Strict AML/KYC under AMLD6</li><li>Consumer protection and complaint handling</li></ul><h3>How Web3Legals Can Help</h3><p>We provide end-to-end MiCA compliance services — from gap analysis and whitepaper legal review to NCA application preparation and ongoing compliance monitoring. <a href="contact.html">Contact us</a> for a MiCA readiness assessment.</p>`},
@@ -161,23 +180,28 @@ const ARTICLES = [
   {slug:'crypto-inheritance-estate',emoji:'🔑',cat:'Token',date:'Feb 2024',title:'Crypto Inheritance Planning: How to Pass Digital Assets to Your Heirs',excerpt:'Legal frameworks for crypto estate planning — multi-sig setups, dead man switches, trusts, and how to ensure your heirs can actually access your assets.',readTime:'6 min',body:`<h2>Crypto Inheritance & Estate Planning</h2><p>An estimated $100 billion in crypto assets are permanently inaccessible due to lost private keys. For those who plan to pass crypto to heirs, the challenge is ensuring access without compromising current security.</p><h3>The Core Problem</h3><p>Traditional estate planning assumes assets can be identified and transferred by executors. Crypto changes this: without private keys or seed phrases, assets are permanently lost. But leaving keys in a will creates security risks before death. The solution requires a careful balance between access and security.</p><h3>Multi-Sig Estate Structures</h3><p>A 2-of-3 multisig wallet — where keys are distributed between the owner, a trusted family member, and a professional custodian or lawyer — can resolve the dilemma. During life, the owner controls 2 keys. On death, the remaining two keyholders can access the funds. Legal documentation should specify the conditions under which the survivor keys can be exercised.</p><h3>Crypto Estate Trust</h3><p>A properly drafted trust can hold crypto assets with a professional trustee. The trust document specifies distribution instructions, the trustee has a fiduciary obligation to follow them, and the legal entity provides a clear framework for probate courts unfamiliar with crypto. Jurisdictions like Wyoming, Nevada, and Liechtenstein have specific provisions for digital asset trusts.</p>`}
 ];
 
-/* ─── MERGE: CMS posts + hardcoded articles ─────────────────
-   Always prioritise CMS posts. Hardcoded articles fill in any
-   slugs not already present in localStorage.                  */
+/* ─── LOAD ALL POSTS ─────────────────────────────────────────
+   Priority: D1 API → localStorage cache → hardcoded ARTICLES  */
+async function loadAllPostsAsync() {
+  // 1. Try D1 API (real database — all devices see same data)
+  const apiPosts = await fetchPostsFromAPI();
+  if (apiPosts && apiPosts.length) {
+    // Merge with hardcoded articles as fallback for any missing slugs
+    const apiSlugs = new Set(apiPosts.map(p => p.slug).filter(Boolean));
+    ARTICLES.forEach(a => { if (!apiSlugs.has(a.slug)) apiPosts.push(a); });
+    return apiPosts;
+  }
+  // 2. Fall back to localStorage cache
+  return loadAllPosts();
+}
+
 function loadAllPosts() {
   let stored = [];
   try {
     stored = JSON.parse(localStorage.getItem('w3l_posts') || '[]');
   } catch(e) { stored = []; }
-
-  // Build a set of slugs already in localStorage
   const storedSlugs = new Set(stored.map(p => p.slug).filter(Boolean));
-
-  // Append hardcoded articles whose slug is not already stored
-  ARTICLES.forEach(a => {
-    if (!storedSlugs.has(a.slug)) stored.push(a);
-  });
-
+  ARTICLES.forEach(a => { if (!storedSlugs.has(a.slug)) stored.push(a); });
   return stored;
 }
 
@@ -229,8 +253,8 @@ function renderBlog(filter) {
   const grid      = document.getElementById('blogGrid');
   const noResults = document.getElementById('noResults');
 
-  // Load, merge, resolve
-  let posts = loadAllPosts().map(resolvePost);
+  // Load from D1 API first, fall back to localStorage
+  let posts = (await loadAllPostsAsync()).map(resolvePost);
 
   // Only show Published (legacy posts with no status are included)
   posts = posts.filter(p => p.status === 'Published');
@@ -500,7 +524,7 @@ if (window.location.hash) {
 }
 
 /* ─── INIT ───────────────────────────────────────────────────  */
-document.addEventListener('DOMContentLoaded', () => renderBlog('All'));
+document.addEventListener('DOMContentLoaded', () => renderBlog('All'));  // API-first load handled inside renderBlog
 </script>
 </body>
 </html>
