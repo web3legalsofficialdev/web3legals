@@ -574,9 +574,9 @@ tbody tr:last-child td{border-bottom:none}
         </div>
         <div class="tab-panel" id="st-3">
           <div class="card" style="margin-bottom:1rem;border-color:var(--gold)">
-            <div class="card-header"><span class="card-title">🚀 Migrate to Cloudflare D1</span></div>
-            <p style="font-size:.82rem;margin-bottom:1.25rem">Export all your current localStorage posts, pages, media and users into the Cloudflare D1 database. Run this once after setting up the Worker.</p>
-            <button class="btn btn-gold" onclick="migrateToD1()"><i class="fas fa-database"></i> Run Migration Now</button>
+            <div class="card-header"><span class="card-title">🚀 Export Posts to Database</span></div>
+            <p style="font-size:.82rem;margin-bottom:1.25rem">Click to export all your posts, pages, and media to the Cloudflare D1 database so they are visible on every device.</p>
+            <button class="btn btn-gold" onclick="migrateToD1()"><i class="fas fa-database"></i> Export to D1 Now</button>
             <div id="migrateStatus" style="margin-top:1rem;font-size:.82rem;display:none"></div>
           </div>
           <div class="card">
@@ -994,25 +994,6 @@ function save(key, val) {
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
-
-/* ─── API CONFIG ─────────────────────────────────────── */
-const API_BASE = 'https://web3legals-api.web3legalsofficialdev.workers.dev'; // Cloudflare Worker API
-let API_SECRET = localStorage.getItem('w3l_api_secret') || '';
-function apiHeaders() {
-  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_SECRET };
-}
-async function apiGet(path) {
-  try { const r = await fetch(API_BASE + path); if (!r.ok) return null; return await r.json(); } catch(e) { return null; }
-}
-async function apiPost(path, data) {
-  try { const r = await fetch(API_BASE + path, { method:'POST', headers:apiHeaders(), body:JSON.stringify(data) }); return await r.json(); } catch(e) { showToast('API error','error'); return null; }
-}
-async function apiPut(path, data) {
-  try { const r = await fetch(API_BASE + path, { method:'PUT', headers:apiHeaders(), body:JSON.stringify(data) }); return await r.json(); } catch(e) { showToast('API error','error'); return null; }
-}
-async function apiDelete(path) {
-  try { const r = await fetch(API_BASE + path, { method:'DELETE', headers:apiHeaders() }); return await r.json(); } catch(e) { showToast('API error','error'); return null; }
-}
 function fmtDate(d) {
   if (!d) return '';
   const dt = new Date(d);
@@ -1092,59 +1073,18 @@ function initUsers() {
   return users;
 }
 
-async function initUsersAsync() {
-  // Try API first
-  const apiUsers = await apiGet('/api/users');
-  if (apiUsers && apiUsers.length) {
-    // Cache locally for offline fallback
-    save(STORAGE.users, apiUsers);
-    return apiUsers;
-  }
-  // Fallback to localStorage
-  return initUsers();
-}
-
-async function doLogin() {
+function doLogin() {
   const email = document.getElementById('loginEmail').value.trim().toLowerCase();
   const pass = document.getElementById('loginPass').value;
-  const errEl = document.getElementById('loginError');
-  errEl.style.display = 'none';
-
-  // Always validate against localStorage first (instant, no CORS issues)
   const users = initUsers();
   const user = users.find(u => u.email.toLowerCase() === email && u.password === pass && u.active !== false);
-
   if (!user) {
-    // Try API as fallback (in case user only exists in D1)
-    try {
-      const res = await fetch(API_BASE + '/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password: pass })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.ok && data.user) {
-          data.user.password = pass;
-          save(STORAGE.session, { id: data.user.id, ts: Date.now() });
-          API_SECRET = pass;
-          localStorage.setItem('w3l_api_secret', pass);
-          currentUser = data.user;
-          document.getElementById('loginScreen').style.display = 'none';
-          document.getElementById('appShell').style.display = 'block';
-          initApp();
-          return;
-        }
-      }
-    } catch(e) {}
+    const errEl = document.getElementById('loginError');
     errEl.textContent = 'Invalid email or password.';
     errEl.style.display = 'block';
     return;
   }
-
-  // localStorage login succeeded
   save(STORAGE.session, { id: user.id, ts: Date.now() });
-  API_SECRET = pass;
   localStorage.setItem('w3l_api_secret', pass);
   currentUser = user;
   document.getElementById('loginScreen').style.display = 'none';
@@ -1165,7 +1105,6 @@ function doLogout() {
 function checkSession() {
   const sess = load(STORAGE.session);
   if (!sess) return false;
-  // Use localStorage for session check (sync, no network delay)
   const users = initUsers();
   const user = users.find(u => u.id === sess.id && u.active !== false);
   if (!user) return false;
@@ -1284,19 +1223,11 @@ function toggleCollapsible(header) {
 }
 
 /* ─── DASHBOARD ──────────────────────────────────────── */
-async function renderDashboard() {
-  // Load from API, cache locally
-  const [apiPosts, apiPages, apiMedia] = await Promise.all([
-    apiGet('/api/posts'), apiGet('/api/pages'), apiGet('/api/media')
-  ]);
-  if (apiPosts) save(STORAGE.posts, apiPosts);
-  if (apiPages) save(STORAGE.pages, apiPages);
-  if (apiMedia) save(STORAGE.media, apiMedia);
-
-  const posts = apiPosts || load(STORAGE.posts) || [];
-  const pages = apiPages || load(STORAGE.pages) || [];
-  const media = apiMedia || load(STORAGE.media) || [];
-  const users = await initUsersAsync();
+function renderDashboard() {
+  const posts = load(STORAGE.posts) || [];
+  const pages = load(STORAGE.pages) || [];
+  const media = load(STORAGE.media) || [];
+  const users = initUsers();
   const myPosts = isAdmin() ? posts : posts.filter(p => p.authorId === currentUser.id);
 
   document.getElementById('dashStats').innerHTML = `
@@ -1346,9 +1277,7 @@ function getDefaultPosts() {
   ];
 }
 
-async function renderPosts() {
-  const apiPosts = await apiGet('/api/posts');
-  if (apiPosts) save(STORAGE.posts, apiPosts);
+function renderPosts() {
   const posts = getPosts();
   const search = document.getElementById('postsSearch')?.value.toLowerCase() || '';
   const statusFilter = document.getElementById('postsFilterStatus')?.value || '';
@@ -1501,10 +1430,9 @@ function editPost(id) {
 }
 
 
-async function deletePost(id) {
+function deletePost(id) {
   if (!confirm('Delete this post? This cannot be undone.')) return;
-  await apiDelete('/api/posts/' + id);
-  let posts = load(STORAGE.posts) || [];
+  let posts = load(STORAGE.posts) || getDefaultPosts();
   posts = posts.filter(p => p.id !== id);
   save(STORAGE.posts, posts);
   renderPosts();
@@ -1578,9 +1506,7 @@ function switchToFirstTab(prefix) {
 
 /* ─── PAGES ──────────────────────────────────────────── */
 
-async function renderPages() {
-  const apiPages = await apiGet('/api/pages');
-  if (apiPages) save(STORAGE.pages, apiPages);
+function renderPages() {
   const pages = load(STORAGE.pages) || [];
   const myPages = isAdmin() ? pages : pages.filter(p => p.authorId === currentUser.id);
   const tbody = document.getElementById('pagesTableBody');
@@ -1668,7 +1594,7 @@ function editPage(id) {
   switchToFirstTab('ed');
 }
 
-async function savePost() {
+function savePost() {
   // Handles both posts and pages depending on editingPage
   const title = document.getElementById('edTitle').value.trim();
   if (!title) { showToast('Title is required', 'error'); return; }
@@ -1714,42 +1640,22 @@ async function savePost() {
     } else {
       pages.push({ id: uid(), ...data });
     }
-    // Save page via API
-    if (editingPage) {
-      await apiPut('/api/pages/' + editingPage, data);
-    } else {
-      data.id = uid();
-      await apiPost('/api/pages', data);
-    }
-    // Update local cache
-    let pages = load(STORAGE.pages) || [];
-    if (editingPage) {
-      const idx = pages.findIndex(p => p.id === editingPage);
-      if (idx !== -1) pages[idx] = { ...pages[idx], ...data };
-      else pages.push(data);
-    } else { pages.push(data); }
     save(STORAGE.pages, pages);
     closeModal('editorModal');
     renderPages();
     showToast(editingPage ? 'Page updated ✓' : 'Page created ✓', 'success');
   } else {
     const authorId = isAdmin() ? (document.getElementById('edAuthorSelect').value || currentUser.id) : currentUser.id;
+    let posts = load(STORAGE.posts);
+    if (!posts) posts = getDefaultPosts();
     const postData = { ...data, category: document.getElementById('edCategory').value, emoji: document.getElementById('edEmoji').value || '📝', publishDate: document.getElementById('edPublishDate').value, readTime: readTime(content), authorId };
-
-    // Save post via API
-    if (editingPost) {
-      await apiPut('/api/posts/' + editingPost, postData);
-    } else {
-      postData.id = uid();
-      await apiPost('/api/posts', postData);
-    }
-    // Update local cache
-    let posts = load(STORAGE.posts) || getDefaultPosts();
     if (editingPost) {
       const idx = posts.findIndex(p => p.id === editingPost);
       if (idx !== -1) posts[idx] = { ...posts[idx], ...postData };
-      else posts.push(postData);
-    } else { posts.push(postData); }
+      else posts.push({ id: uid(), ...postData });
+    } else {
+      posts.push({ id: uid(), ...postData });
+    }
     save(STORAGE.posts, posts);
     closeModal('editorModal');
     renderPosts();
@@ -1757,9 +1663,8 @@ async function savePost() {
   }
 }
 
-async function deletePage(id) {
+function deletePage(id) {
   if (!confirm('Delete this page?')) return;
-  await apiDelete('/api/pages/' + id);
   let pages = load(STORAGE.pages) || [];
   pages = pages.filter(p => p.id !== id);
   save(STORAGE.pages, pages);
@@ -1925,9 +1830,7 @@ function updateSeoPreview() {
 /* ─── MEDIA ──────────────────────────────────────────── */
 let previewingMedia = null;
 
-async function renderMedia() {
-  const apiMedia = await apiGet('/api/media');
-  if (apiMedia) save(STORAGE.media, apiMedia);
+function renderMedia() {
   const media = load(STORAGE.media) || [];
   const search = (document.getElementById('mediaSearch')?.value || '').toLowerCase();
   const filter = document.getElementById('mediaFilter')?.value || '';
@@ -1961,7 +1864,7 @@ async function renderMedia() {
     </div>`).join('');
 }
 
-async function handleMediaUpload(files) {
+function handleMediaUpload(files) {
   const media = load(STORAGE.media) || [];
   let count = 0;
   Array.from(files).forEach(file => {
@@ -1970,11 +1873,6 @@ async function handleMediaUpload(files) {
       media.push({ id: uid(), name: file.name, size: file.size, type: fileType(file.name), data: e.target.result, uploadedAt: new Date().toISOString() });
       count++;
       if (count === files.length) {
-        // Save each new file to API
-        const newFiles = media.slice(media.length - count);
-        for (const f of newFiles) {
-          await apiPost('/api/media', f);
-        }
         save(STORAGE.media, media);
         renderMedia();
         showToast(`${count} file${count>1?'s':''} uploaded ✓`);
@@ -2013,9 +1911,8 @@ function copyMediaUrl() {
   if (previewingMedia) copyUrl(previewingMedia);
 }
 
-async function deleteMedia(id) {
+function deleteMedia(id) {
   if (!confirm('Delete this file?')) return;
-  await apiDelete('/api/media/' + id);
   let media = load(STORAGE.media) || [];
   media = media.filter(m => m.id !== id);
   save(STORAGE.media, media);
@@ -2040,11 +1937,9 @@ function initMediaDropZone() {
 let editingAuthor = null;
 let authorPhotoData = '';
 
-async function renderAuthors() {
+function renderAuthors() {
   if (!isAdmin()) return;
-  const users = await initUsersAsync();
-  const apiPosts = await apiGet('/api/posts');
-  if (apiPosts) save(STORAGE.posts, apiPosts);
+  const users = initUsers();
   const posts = load(STORAGE.posts) || [];
   const tbody = document.getElementById('authorsTableBody');
   tbody.innerHTML = users.map(u => {
@@ -2117,7 +2012,7 @@ function previewAuthorPhoto(input) {
   reader.readAsDataURL(file);
 }
 
-async function saveAuthor() {
+function saveAuthor() {
   const name = document.getElementById('authorName').value.trim();
   const email = document.getElementById('authorEmail').value.trim().toLowerCase();
   const password = document.getElementById('authorPassword').value;
@@ -2149,14 +2044,6 @@ async function saveAuthor() {
   } else {
     users.push({ id: uid(), ...userData });
   }
-  // Save to API
-  if (editingAuthor) {
-    await apiPut('/api/users/' + editingAuthor, { ...userData, id: editingAuthor });
-  } else {
-    const newUser = { ...userData, id: uid() };
-    users.push(newUser);
-    await apiPost('/api/users', newUser);
-  }
   save(STORAGE.users, users);
   closeModal('authorModal');
   renderAuthors();
@@ -2171,10 +2058,9 @@ function toggleAuthorActive(id, active) {
   showToast(active ? 'Author activated' : 'Author deactivated');
 }
 
-async function deleteAuthor(id) {
+function deleteAuthor(id) {
   if (id === 'admin') { showToast('Cannot delete the admin account', 'error'); return; }
   if (!confirm('Delete this author? Their posts will remain.')) return;
-  await apiDelete('/api/users/' + id);
   let users = initUsers();
   users = users.filter(u => u.id !== id);
   save(STORAGE.users, users);
@@ -2211,7 +2097,7 @@ function previewProfilePhoto(input) {
   reader.readAsDataURL(file);
 }
 
-async function saveProfile() {
+function saveProfile() {
   let users = initUsers();
   const idx = users.findIndex(u => u.id === currentUser.id);
   if (idx === -1) return;
@@ -2226,7 +2112,6 @@ async function saveProfile() {
     photo: profilePhotoData
   };
   users[idx] = updated;
-  await apiPut('/api/users/' + currentUser.id, updated);
   save(STORAGE.users, users);
   currentUser = updated;
   save(STORAGE.session, { id: currentUser.id, ts: Date.now() });
@@ -2236,7 +2121,7 @@ async function saveProfile() {
 
 function showChangePassModal() { openModal('changePassModal'); }
 
-async function savePasswordFromModal() {
+function savePasswordFromModal() {
   const current = document.getElementById('cpCurrent').value;
   const newPass = document.getElementById('cpNew').value;
   const confirm = document.getElementById('cpConfirm').value;
@@ -2274,38 +2159,6 @@ function setValue(id, val) { const el = document.getElementById(id); if (el) el.
 function setValueIfExists(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
 function getVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
 
-async function migrateToD1() {
-  const statusEl = document.getElementById('migrateStatus');
-  statusEl.style.display = 'block';
-  statusEl.style.color = 'var(--gold)';
-  statusEl.textContent = '⏳ Migrating data to D1...';
-
-  const posts = load(STORAGE.posts) || [];
-  const pages = load(STORAGE.pages) || [];
-  const users = load(STORAGE.users) || initUsers();
-  const media = load(STORAGE.media) || [];
-
-  try {
-    const res = await fetch(API_BASE + '/api/migrate', {
-      method: 'POST',
-      headers: apiHeaders(),
-      body: JSON.stringify({ posts, pages, users, media })
-    });
-    const data = await res.json();
-    if (data.ok) {
-      statusEl.style.color = 'var(--success)';
-      statusEl.textContent = `✅ Migration complete! ${posts.length} posts, ${pages.length} pages, ${users.length} users, ${media.length} media files migrated to D1.`;
-      showToast('Migration complete ✓', 'success');
-    } else {
-      statusEl.style.color = 'var(--danger)';
-      statusEl.textContent = '❌ Migration failed: ' + (data.error || 'Unknown error');
-    }
-  } catch(e) {
-    statusEl.style.color = 'var(--danger)';
-    statusEl.textContent = '❌ Could not reach Worker API. Make sure it is deployed and the URL is correct.';
-  }
-}
-
 function saveSettings() {
   const s = load(STORAGE.settings) || {};
   save(STORAGE.settings, {
@@ -2332,7 +2185,7 @@ function saveApiSecrets() {
   showToast('Secrets saved ✓', 'success');
 }
 
-async function changePassword() {
+function changePassword() {
   if (!isAdmin()) return;
   const current = getVal('pwCurrent');
   const newPass = getVal('pwNew');
@@ -2351,6 +2204,47 @@ async function changePassword() {
 }
 
 /* ─── KEYBOARD / GLOBAL EVENTS ──────────────────────── */
+/* ─── D1 MIGRATION ──────────────────────────────────────
+   Sends localStorage data to Cloudflare D1 via Worker API.
+   Login and all CMS features continue to use localStorage.
+   Only the migration button and blog reading use the API.   */
+const D1_API = 'https://web3legals-api.web3legalsofficialdev.workers.dev';
+
+function migrateToD1() {
+  const statusEl = document.getElementById('migrateStatus');
+  statusEl.style.display = 'block';
+  statusEl.style.color = 'var(--gold)';
+  statusEl.textContent = '⏳ Exporting data to D1...';
+
+  const posts = JSON.parse(localStorage.getItem('w3l_posts') || '[]');
+  const pages = JSON.parse(localStorage.getItem('w3l_pages') || '[]');
+  const users = JSON.parse(localStorage.getItem('w3l_users') || '[]');
+  const media = JSON.parse(localStorage.getItem('w3l_media') || '[]');
+
+  const pass = localStorage.getItem('w3l_api_secret') || 'R9252784858r@';
+
+  fetch(D1_API + '/api/migrate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + pass },
+    body: JSON.stringify({ posts, pages, users, media })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      statusEl.style.color = '#2ecc71';
+      statusEl.textContent = '✅ Done! ' + posts.length + ' posts, ' + pages.length + ' pages, ' + users.length + ' users exported to D1.';
+      showToast('Export complete ✓', 'success');
+    } else {
+      statusEl.style.color = '#e74c3c';
+      statusEl.textContent = '❌ Failed: ' + (data.error || 'Unknown error');
+    }
+  })
+  .catch(() => {
+    statusEl.style.color = '#e74c3c';
+    statusEl.textContent = '❌ Could not reach Worker. Check it is deployed.';
+  });
+}
+
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
@@ -2388,6 +2282,24 @@ document.addEventListener('DOMContentLoaded', () => {
   // RTE focus to update read time
   const rteBody = document.getElementById('rteBody');
   if (rteBody) rteBody.addEventListener('input', updateReadTime);
+
+  // RTE PASTE FIX: intercept paste so HTML code renders correctly
+  if (rteBody) {
+    rteBody.addEventListener('paste', function(e) {
+      const plain   = (e.clipboardData || window.clipboardData).getData('text/plain');
+      const richHtml = (e.clipboardData || window.clipboardData).getData('text/html');
+      if (richHtml && richHtml.trim()) {
+        e.preventDefault();
+        document.execCommand('insertHTML', false, richHtml);
+        return;
+      }
+      if (plain && /<[a-zA-Z][^>]*>/.test(plain)) {
+        e.preventDefault();
+        document.execCommand('insertHTML', false, plain);
+        return;
+      }
+    });
+  }
 });
 </script>
 </body>
