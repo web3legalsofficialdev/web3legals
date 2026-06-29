@@ -1110,41 +1110,39 @@ async function doLogin() {
   const errEl = document.getElementById('loginError');
   errEl.style.display = 'none';
 
-  // Try API login first
-  try {
-    const res = await fetch(API_BASE + '/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: pass })
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.ok && data.user) {
-        // Store password locally for re-auth (needed for API secret)
-        data.user.password = pass;
-        save(STORAGE.session, { id: data.user.id, ts: Date.now() });
-        // Store API secret = password for write operations
-        API_SECRET = pass;
-        localStorage.setItem('w3l_api_secret', pass);
-        currentUser = data.user;
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('appShell').style.display = 'block';
-        initApp();
-        return;
-      }
-    }
-  } catch(e) {
-    // API unreachable — fall back to localStorage login
-  }
-
-  // Fallback: localStorage login (works offline / before Worker is set up)
+  // Always validate against localStorage first (instant, no CORS issues)
   const users = initUsers();
   const user = users.find(u => u.email.toLowerCase() === email && u.password === pass && u.active !== false);
+
   if (!user) {
+    // Try API as fallback (in case user only exists in D1)
+    try {
+      const res = await fetch(API_BASE + '/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pass })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ok && data.user) {
+          data.user.password = pass;
+          save(STORAGE.session, { id: data.user.id, ts: Date.now() });
+          API_SECRET = pass;
+          localStorage.setItem('w3l_api_secret', pass);
+          currentUser = data.user;
+          document.getElementById('loginScreen').style.display = 'none';
+          document.getElementById('appShell').style.display = 'block';
+          initApp();
+          return;
+        }
+      }
+    } catch(e) {}
     errEl.textContent = 'Invalid email or password.';
     errEl.style.display = 'block';
     return;
   }
+
+  // localStorage login succeeded
   save(STORAGE.session, { id: user.id, ts: Date.now() });
   API_SECRET = pass;
   localStorage.setItem('w3l_api_secret', pass);
@@ -1167,8 +1165,8 @@ function doLogout() {
 function checkSession() {
   const sess = load(STORAGE.session);
   if (!sess) return false;
-  // Try to validate against API first, fall back to localStorage users
-  const users = await initUsersAsync();
+  // Use localStorage for session check (sync, no network delay)
+  const users = initUsers();
   const user = users.find(u => u.id === sess.id && u.active !== false);
   if (!user) return false;
   currentUser = user;
