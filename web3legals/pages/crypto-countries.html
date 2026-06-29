@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto-Friendly Countries 2024 — Web3Legals | Top 20 Jurisdictions</title>
+  <meta name="description" content="Compare the top 20 crypto-friendly countries — tax treatment, regulatory framework, licensing requirements, and USPs for blockchain businesses.">
+  <link rel="canonical" href="https://web3legals.com/pages/crypto-countries.html">
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/layout.js" defer></script>
+</head>
+<body>
+<main style="padding-top:70px;">
+
+<section style="background:var(--black-soft);border-bottom:1px solid var(--black-border);padding:4rem 0 3rem;">
+  <div class="container">
+    <div class="breadcrumb"><a href="../index.html">Home</a><span class="sep">›</span><span>Crypto Countries</span></div>
+    <span class="section-label">Global Jurisdiction Guide</span>
+    <h1>Top 20 Crypto-Friendly Countries</h1>
+    <div class="divider"></div>
+    <p style="max-width:680px;">A comprehensive comparison of the world's leading crypto jurisdictions — covering regulatory framework, tax treatment, licensing requirements, banking access, and strategic USPs for Web3 businesses.</p>
+  </div>
+</section>
+
+<!-- VIEW TOGGLE -->
+<section style="padding:2rem 0;border-bottom:1px solid var(--black-border);">
+  <div class="container" style="display:flex;gap:1rem;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+    <div style="display:flex;gap:0.5rem;">
+      <button class="filter-btn active" id="btnCards" onclick="setView('cards')">Card View</button>
+      <button class="filter-btn" id="btnTable" onclick="setView('table')">Table View</button>
+    </div>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+      <button class="filter-btn active" data-region="All" onclick="filterRegion(this,'All')">All Regions</button>
+      <button class="filter-btn" data-region="Middle East" onclick="filterRegion(this,'Middle East')">Middle East</button>
+      <button class="filter-btn" data-region="Asia" onclick="filterRegion(this,'Asia')">Asia</button>
+      <button class="filter-btn" data-region="Europe" onclick="filterRegion(this,'Europe')">Europe</button>
+      <button class="filter-btn" data-region="Americas" onclick="filterRegion(this,'Americas')">Americas</button>
+      <button class="filter-btn" data-region="Offshore" onclick="filterRegion(this,'Offshore')">Offshore</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div id="cardsView" class="grid-2" style="gap:1.5rem;"></div>
+    <div id="tableView" style="display:none;">
+      <div class="table-wrap">
+        <table class="country-table" id="countryTable"></table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.filter-btn{background:var(--black-card);border:1px solid var(--black-border);color:var(--white-muted);padding:0.4rem 1rem;border-radius:2px;cursor:pointer;font-size:0.8rem;font-family:var(--font-mono);letter-spacing:0.05em;transition:all var(--transition);}
+.filter-btn:hover,.filter-btn.active{border-color:var(--gold);color:var(--gold);background:var(--gold-muted);}
+.country-card{background:var(--black-card);border:1px solid var(--black-border);border-radius:var(--radius-lg);padding:1.75rem;transition:all var(--transition);}
+.country-card:hover{border-color:var(--gold);box-shadow:var(--gold-glow);transform:translateY(-2px);}
+.score-bar{height:6px;border-radius:3px;background:var(--black-border);overflow:hidden;margin:4px 0;}
+.score-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold-dark),var(--gold));}
+</style>
+
+<script>
+const COUNTRIES = [
+  {rank:1,flag:'🇦🇪',name:'UAE (Dubai)',region:'Middle East',regulator:'VARA / DIFC DFSA / ADGM FSRA',framework:'VARA Framework 2023',tax:'0% CGT, 9% Corp Tax (crypto exempt)',banking:'⭐⭐⭐⭐⭐',ease:'⭐⭐⭐⭐',score:95,usp:'World\'s most comprehensive crypto regulatory framework with 0% capital gains. VARA issues licenses for 7 activity types. DIFC and ADGM offer additional regulated environments. Zero crypto tax for individuals.',pros:['0% personal crypto tax','VARA — dedicated crypto regulator','Massive crypto ecosystem in Dubai','English-language legal system (DIFC/ADGM)'],cons:['High setup costs (AED 500K+)','Residency requirements for some licenses','9% corporate tax from 2023 (most crypto exempt)']},
+  {rank:2,flag:'🇸🇬',name:'Singapore',region:'Asia',regulator:'MAS (Monetary Authority)',framework:'Payment Services Act 2019',tax:'0% CGT, 17% Corp Tax',banking:'⭐⭐⭐⭐⭐',ease:'⭐⭐⭐⭐',score:92,usp:'Asia\'s premier regulated crypto hub. MAS licences provide global credibility. No capital gains tax. Strong rule of law and English-language legal system. PSA framework is mature and well-understood.',pros:['0% capital gains tax','Globally respected MAS regulation','Excellent banking access','Stable, mature legal system'],cons:['Strict MAS licensing (low approval rate)','High operating costs','Regulatory uncertainty for retail crypto']},
+  {rank:3,flag:'🇨🇭',name:'Switzerland',region:'Europe',regulator:'FINMA',framework:'DLT Act 2021 + FINMA Guidelines',tax:'0% CGT (individuals), 8.5% Corp Tax',banking:'⭐⭐⭐⭐⭐',ease:'⭐⭐⭐⭐',score:90,usp:'Crypto Valley in Zug is the original blockchain hub. FINMA\'s clear token classification framework (2018) remains the global benchmark. DLT Act 2021 introduced ledger-based securities. SEBA and Sygnum provide dedicated crypto banking.',pros:['Clear regulatory framework since 2018','0% CGT for individuals','Crypto-dedicated banks (SEBA, Sygnum)','Swiss Foundation structure ideal for DAOs'],cons:['High cost of living and operations','Complex cantonal tax variations','FINMA can be slow and conservative']},
+  {rank:4,flag:'🇰🇾',name:'Cayman Islands',region:'Offshore',regulator:'CIMA',framework:'VASP Act 2020',tax:'0% all taxes',banking:'⭐⭐⭐⭐',ease:'⭐⭐⭐⭐⭐',score:89,usp:'Default jurisdiction for crypto foundations, VC funds, and token issuers. Cayman Foundation Company is the global standard for DAO structures. No direct taxes of any kind. Fast, flexible company formation.',pros:['0% all taxes (income, CGT, corporate)','Gold standard for crypto foundations','VC/fund structure flexibility','Familiar to institutional investors'],cons:['Reputational scrutiny from FATF grey lists','Banking increasingly difficult','Not suitable as operating jurisdiction','No physical presence required = substance concerns']},
+  {rank:5,flag:'🇧🇭',name:'Bahrain',region:'Middle East',regulator:'CBB (Central Bank)',framework:'Crypto-Asset Module (CRA)',tax:'0% CGT, 0% Corp Tax',banking:'⭐⭐⭐⭐',ease:'⭐⭐⭐⭐',score:85,usp:'GCC\'s most accessible crypto jurisdiction. Lower costs than UAE with comparable regulatory credibility. CBB sandbox allows testing without full licensing. Strategic gateway to Saudi Arabia.',pros:['Lower setup costs than UAE','Regulatory sandbox programme','0% crypto tax','Access to Saudi market'],cons:['Smaller ecosystem than Dubai','Limited global brand recognition','Banking options fewer than Singapore']},
+  {rank:6,flag:'🇪🇺',name:'EU / MiCA',region:'Europe',regulator:'ESMA + National NCAs',framework:'Markets in Crypto-Assets (MiCA)',tax:'Varies by member state',banking:'⭐⭐⭐⭐',ease:'⭐⭐⭐',score:83,usp:'MiCA creates a single passport across 27 EU countries — the world\'s largest unified regulated crypto market. One license, 450 million consumers. Germany, France, Lithuania, and Ireland are popular entry points.',pros:['Single licence for 27 countries','Massive consumer market','Regulatory certainty for compliant firms','Strong institutional confidence'],cons:['Complex, expensive licensing','TFR unhosted wallet rules burdensome','ART/EMT restrictions limit stablecoin options','MiCA does not cover DeFi or NFTs clearly']},
+  {rank:7,flag:'🇬🇧',name:'United Kingdom',region:'Europe',regulator:'FCA',framework:'FSMA 2023 + Crypto Regime (pending)',tax:'10-20% CGT, 19-25% Corp Tax',banking:'⭐⭐⭐⭐',ease:'⭐⭐⭐',score:80,usp:'Major global financial centre with evolving crypto framework. FCA AML registration + incoming full authorisation regime. UK-specific advantage: common law system, English as global legal language, deep institutional investor base.',pros:['World-class financial centre','English common law — global standard','Deep institutional investor market','Incoming clear regulatory framework'],cons:['FCA extremely tough on applications','Financial promotions regime is burdensome','High tax rates compared to competitors','Post-Brexit regulatory divergence']},
+  {rank:8,flag:'🇭🇰',name:'Hong Kong',region:'Asia',regulator:'SFC + HKMA',framework:'AMLO VASP Licensing 2023',tax:'0% CGT, 16.5% Corp Tax',banking:'⭐⭐⭐',ease:'⭐⭐⭐',score:78,usp:'Dramatic 2023 reversal — now actively courting crypto businesses. SFC VASP licenses allow retail trading. Gateway to Mainland China capital (indirectly). HKMA stablecoin regime incoming 2025.',pros:['0% capital gains tax','Access to Asian capital markets','Retail crypto trading now permitted','Strategic China proximity'],cons:['Geopolitical risk with China','Limited banking options for crypto','Expensive jurisdiction','SFC licensing is demanding']},
+  {rank:9,flag:'🇲🇹',name:'Malta',region:'Europe',regulator:'MFSA + FIAU',framework:'VFA Act 2018 (pre-MiCA)',tax:'5% effective corp tax (holding co)',banking:'⭐⭐⭐',ease:'⭐⭐⭐',score:74,usp:'Early mover in EU crypto regulation. VFA Framework attracted Binance, OKX, and others. Now transitioning to MiCA. 5% effective corporate tax via participation exemption. EU passport via MiCA.',pros:['Early regulatory clarity attracted exchanges','EU membership (MiCA passport)','Low effective corporate tax','English-language jurisdiction'],cons:['Banking notorious difficult','Reputation suffered post-2018','Small jurisdiction, limited talent pool','VFA Act being superseded by MiCA']},
+  {rank:10,flag:'🇵🇹',name:'Portugal',region:'Europe',regulator:'Banco de Portugal',framework:'MiCA (EU Member)',tax:'0% CGT for individuals (ended 2023)',banking:'⭐⭐⭐',ease:'⭐⭐⭐',score:72,usp:'NHR (Non-Habitual Resident) tax regime offers 10-year tax benefits for new residents. EU member (MiCA passport). Growing Lisbon/Porto tech/crypto ecosystem. Low cost of living for European hub.',pros:['NHR regime for new residents','Low cost of living vs other EU','Growing crypto community','EU MiCA passport available'],cons:['0% CGT removed from Jan 2023 (now 28%)','Portuguese VASP licensing still developing','Language barrier outside Lisbon','Not ideal for corporate structures']},
+  {rank:11,flag:'🇱🇹',name:'Lithuania',region:'Europe',regulator:'Bank of Lithuania / FNTT',framework:'MiCA + national VASP register',tax:'15% Corp Tax, 20% CGT',banking:'⭐⭐⭐⭐',ease:'⭐⭐⭐⭐',score:76,usp:'EU\'s fastest and most accessible VASP registration. EMI licences enable crypto-friendly banking. Dozens of major exchanges hold Lithuanian VASP registrations. Low cost base vs Western Europe.',pros:['Fastest EU VASP registration','Low regulatory costs','EU MiCA passport','Lower costs than Western Europe'],cons:['English less prevalent','Smaller market','Reputational risk from lax oversight history','Increasing regulatory scrutiny']},
+  {rank:12,flag:'🇮🇪',name:'Ireland',region:'Europe',regulator:'Central Bank of Ireland',framework:'MiCA + VASP Registration',tax:'12.5% Corp Tax, 33% CGT',banking:'⭐⭐⭐⭐',ease:'⭐⭐⭐',score:74,usp:'12.5% corporate tax — lowest in Anglophone EU. English common law within EU. Major US tech firms use Irish HQ for EU operations — familiar framework for US founders. Dublin growing as fintech hub.',pros:['12.5% corporate tax','English-language EU jurisdiction','US tech company familiarity','Strong fintech ecosystem'],cons:['33% CGT is high','Central Bank can be conservative','High property costs in Dublin','VASP licensing relatively new']},
+  {rank:13,flag:'🇻🇬',name:'British Virgin Islands',region:'Offshore',regulator:'FSC',framework:'VASP Act 2023',tax:'0% all taxes',banking:'⭐⭐⭐',ease:'⭐⭐⭐⭐',score:71,usp:'Classic offshore jurisdiction for crypto holding companies and token issuers. 0% taxes. BVI Business Company is flexible and widely understood by banks. New VASP Act 2023 provides regulatory clarity.',pros:['0% all taxes','Fast company formation','Widely understood by banks and lawyers','Flexible corporate structures'],cons:['Increased FATF scrutiny','Banking increasingly difficult','Hurricane risk to physical operations','Reputational concerns for retail-facing businesses']},
+  {rank:14,flag:'🇬🇮',name:'Gibraltar',region:'Europe',regulator:'GFSC',framework:'DLT Provider Regulations 2018',tax:'12.5% Corp Tax, 0% CGT',banking:'⭐⭐⭐',ease:'⭐⭐⭐',score:70,usp:'World\'s first DLT-specific licensing regime (2018). English common law. 0% capital gains tax. Small but sophisticated jurisdiction. Gibraltar Blockchain Exchange (GBX) demonstrates local industry depth.',pros:['First-mover DLT regulation','0% CGT','English common law','Small, agile regulator'],cons:['Post-Brexit: no EU passport','Small jurisdiction','Banking difficulties','Limited local talent pool']},
+  {rank:15,flag:'🇯🇵',name:'Japan',region:'Asia',regulator:'FSA (Financial Services Agency)',framework:'Payment Services Act (crypto assets)',tax:'55% max on crypto income',banking:'⭐⭐⭐⭐',ease:'⭐⭐',score:67,usp:'World\'s most mature exchange licensing regime. Major exchanges fully licensed (bitFlyer, Coincheck, GMO Coin). Large retail market. FSA\'s strict oversight (post-Mt.Gox) has produced consumer confidence absent elsewhere.',pros:['Largest licensed exchange market','High consumer trust','Strong institutional market','Mature regulatory framework'],cons:['55% max tax on crypto income','Extremely restrictive on new token listings','Slow regulatory process','High compliance burden']},
+  {rank:16,flag:'🇦🇺',name:'Australia',region:'Asia',regulator:'ASIC + AUSTRAC',framework:'Digital Asset Exchange registration',tax:'CGT applies (50% discount at 12mo)',banking:'⭐⭐⭐⭐',ease:'⭐⭐⭐',score:72,usp:'Growing regulatory framework. Large retail crypto market. AUSTRAC registration for exchanges. ASIC licensing for financial products. 50% CGT discount for assets held over 12 months. Incoming comprehensive crypto legislation.',pros:['50% CGT discount after 1 year','Large, sophisticated retail market','English common law','Active regulatory development'],cons:['CGT still applies (unlike UAE/Singapore)','Incoming mandatory licensing creates uncertainty','Banks historically crypto-unfriendly','High operational costs']},
+  {rank:17,flag:'🇸🇻',name:'El Salvador',region:'Americas',regulator:'BCR (Banco Central)',framework:'Bitcoin Law 2021 + Digital Assets Law',tax:'0% CGT on crypto',banking:'⭐⭐',ease:'⭐⭐⭐',score:62,usp:'Only country with Bitcoin as legal tender (though now voluntary). 0% capital gains tax on crypto. "Freedom City" (Bukele\'s crypto city project). IMF deal 2024 weakened Bitcoin mandate but preserved crypto-friendly posture.',pros:['0% CGT on crypto','Bitcoin legal tender (historical significance)','Crypto-specific legal framework','Low cost jurisdiction'],cons:['Bitcoin acceptance now voluntary (post-IMF deal)','Banking infrastructure limited','Political risk','Small market']},
+  {rank:18,flag:'🇲🇭',name:'Marshall Islands',region:'Offshore',regulator:'Registrar of Corporations',framework:'DAO Act 2022',tax:'0% all taxes',banking:'⭐⭐',ease:'⭐⭐⭐⭐',score:65,usp:'World\'s first jurisdiction with specific DAO legislation (2022). DAOs can be legally incorporated with on-chain governance recognised. Minimal oversight. Low formation costs. 0% taxes.',pros:['World\'s first DAO-specific law','On-chain governance legally recognised','0% taxes','Very low formation costs'],cons:['Limited banking options','No physical regulatory presence','FATF concerns','Not suitable for retail-facing businesses']},
+  {rank:19,flag:'🇵🇦',name:'Panama',region:'Americas',regulator:'Superintendencia de Bancos',framework:'Law 129 of 2022',tax:'0% on foreign-source income',banking:'⭐⭐⭐',ease:'⭐⭐⭐',score:64,usp:'Law 129 (2022) provides crypto legal framework. Territorial tax system — foreign-source income tax-free. Dollar-based economy. Growing as Latin American crypto hub. Easier banking than most offshore centres.',pros:['Territorial tax (foreign income exempt)','Law 129 crypto framework','USD economy (no FX risk)','Better banking than pure offshore'],cons:['Law 129 is basic — limited regulatory clarity','US political/FATF pressure','Limited institutional investor interest','Not suitable for licensed financial services']},
+  {rank:20,flag:'🇧🇸',name:'The Bahamas',region:'Offshore',regulator:'SCB (Securities Commission)',framework:'DARE Act 2020',tax:'0% all taxes',banking:'⭐⭐⭐',ease:'⭐⭐⭐',score:60,usp:'DARE Act (2020) was innovative when introduced. FTX was registered here (cautionary tale for due diligence). SCB has since tightened oversight. 0% taxes. USD-based economy. English common law.',pros:['DARE Act provides crypto framework','0% taxes','English common law','USD economy'],cons:['FTX collapse severely damaged reputation','SCB tightened — harder to obtain licenses','Banking increasingly difficult','Limited institutional confidence post-FTX']}
+];
+
+let currentView = 'cards';
+let currentRegion = 'All';
+
+function setView(view) {
+  currentView = view;
+  document.getElementById('btnCards').classList.toggle('active', view === 'cards');
+  document.getElementById('btnTable').classList.toggle('active', view === 'table');
+  document.getElementById('cardsView').style.display = view === 'cards' ? 'grid' : 'none';
+  document.getElementById('tableView').style.display = view === 'table' ? 'block' : 'none';
+  render();
+}
+
+function filterRegion(btn, region) {
+  document.querySelectorAll('[data-region]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentRegion = region;
+  render();
+}
+
+function render() {
+  const filtered = currentRegion === 'All' ? COUNTRIES : COUNTRIES.filter(c => c.region === currentRegion);
+
+  if (currentView === 'cards') {
+    document.getElementById('cardsView').innerHTML = filtered.map(c => `
+      <div class="country-card fade-in">
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;">
+          <div style="font-size:2.5rem;">${c.flag}</div>
+          <div>
+            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.25rem;">
+              <h3 style="font-size:1.1rem;">${c.name}</h3>
+              <span class="tag tag-gold">#${c.rank}</span>
+            </div>
+            <span style="font-size:0.8rem;color:var(--white-muted);">${c.region} · ${c.regulator}</span>
+          </div>
+          <div style="margin-left:auto;text-align:right;">
+            <span style="font-size:1.6rem;font-family:var(--font-display);font-weight:700;color:var(--gold);">${c.score}</span>
+            <span style="font-size:0.7rem;color:var(--white-muted);display:block;">/ 100</span>
+          </div>
+        </div>
+        <div style="height:4px;background:var(--black-border);border-radius:2px;overflow:hidden;margin-bottom:1.25rem;">
+          <div style="height:100%;width:${c.score}%;background:linear-gradient(90deg,var(--gold-dark),var(--gold));border-radius:2px;"></div>
+        </div>
+        <p style="font-size:0.875rem;margin-bottom:1.25rem;border-left:2px solid var(--gold);padding-left:1rem;">${c.usp}</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.25rem;">
+          <div style="background:var(--black);padding:0.75rem;border-radius:var(--radius);">
+            <p style="font-size:0.65rem;font-family:var(--font-mono);letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:0.25rem;">Tax</p>
+            <p style="font-size:0.8rem;color:var(--white);">${c.tax}</p>
+          </div>
+          <div style="background:var(--black);padding:0.75rem;border-radius:var(--radius);">
+            <p style="font-size:0.65rem;font-family:var(--font-mono);letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:0.25rem;">Framework</p>
+            <p style="font-size:0.8rem;color:var(--white);">${c.framework}</p>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div>
+            <p style="font-size:0.7rem;color:var(--gold);margin-bottom:0.5rem;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.1em;">Pros</p>
+            ${c.pros.map(p => `<p style="font-size:0.8rem;color:var(--white-muted);margin-bottom:0.3rem;">✓ ${p}</p>`).join('')}
+          </div>
+          <div>
+            <p style="font-size:0.7rem;color:var(--white-muted);margin-bottom:0.5rem;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.1em;">Cons</p>
+            ${c.cons.map(p => `<p style="font-size:0.8rem;color:var(--white-muted);margin-bottom:0.3rem;">✗ ${p}</p>`).join('')}
+          </div>
+        </div>
+      </div>`).join('');
+
+    document.querySelectorAll('.fade-in').forEach(el => {
+      const obs = new IntersectionObserver(e => { if(e[0].isIntersecting){el.classList.add('visible');obs.unobserve(el);} },{threshold:0.05});
+      obs.observe(el);
+    });
+  } else {
+    const table = document.getElementById('countryTable');
+    table.innerHTML = `
+      <thead><tr>
+        <th>#</th><th>Country</th><th>Region</th><th>Tax</th><th>Regulator</th><th>Banking</th><th>Ease</th><th>Score</th>
+      </tr></thead>
+      <tbody>${filtered.map(c => `<tr>
+        <td style="color:var(--gold);font-family:var(--font-mono);">${c.rank}</td>
+        <td style="color:var(--white);">${c.flag} ${c.name}</td>
+        <td><span class="tag tag-white">${c.region}</span></td>
+        <td style="font-size:0.8rem;">${c.tax}</td>
+        <td style="font-size:0.8rem;">${c.regulator}</td>
+        <td>${c.banking}</td>
+        <td>${c.ease}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <div class="rating-bg"><div class="rating-fill" style="width:${c.score}%"></div></div>
+            <span style="color:var(--gold);font-family:var(--font-mono);font-size:0.85rem;">${c.score}</span>
+          </div>
+        </td>
+      </tr>`).join('')}</tbody>`;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => render());
+</script>
+</body>
+</html>

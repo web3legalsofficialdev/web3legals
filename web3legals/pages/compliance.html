@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compliance Hub — Web3Legals | Crypto Exchange Law by Country</title>
+  <meta name="description" content="Crypto exchange compliance laws and AML requirements for the top 20 jurisdictions. Licensing, KYC/AML, travel rule, and reporting obligations by country.">
+  <link rel="canonical" href="https://web3legals.com/pages/compliance.html">
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/layout.js" defer></script>
+</head>
+<body>
+<main style="padding-top:70px;">
+
+<section style="background:var(--black-soft);border-bottom:1px solid var(--black-border);padding:4rem 0 3rem;">
+  <div class="container">
+    <div class="breadcrumb"><a href="../index.html">Home</a><span class="sep">›</span><span>Compliance</span></div>
+    <span class="section-label">Regulatory Compliance Hub</span>
+    <h1>Crypto Exchange & Related Work Compliance Law</h1>
+    <div class="divider"></div>
+    <p style="max-width:680px;">Detailed compliance and regulatory requirements for operating crypto exchanges and related businesses across the top 20 crypto-friendly countries. Updated Q4 2024.</p>
+  </div>
+</section>
+
+<!-- QUICK SEARCH -->
+<section style="padding:2rem 0;border-bottom:1px solid var(--black-border);">
+  <div class="container">
+    <input type="text" id="searchInput" class="form-input" placeholder="Search country, regulation, or keyword..." style="max-width:500px;" oninput="filterCompliance()">
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div id="complianceAccordion"></div>
+  </div>
+</section>
+
+<style>
+.acc-item{border:1px solid var(--black-border);border-radius:var(--radius-lg);margin-bottom:1rem;overflow:hidden;transition:border-color var(--transition);}
+.acc-item:hover,.acc-item.open{border-color:var(--gold);}
+.acc-header{padding:1.5rem 2rem;cursor:pointer;display:flex;align-items:center;gap:1.25rem;background:var(--black-card);}
+.acc-header:hover{background:rgba(201,168,76,0.03);}
+.acc-arrow{margin-left:auto;color:var(--gold);font-size:1.1rem;transition:transform var(--transition);flex-shrink:0;}
+.acc-item.open .acc-arrow{transform:rotate(180deg);}
+.acc-body{display:none;background:var(--black);border-top:1px solid var(--black-border);}
+.acc-item.open .acc-body{display:block;}
+.compliance-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;padding:2rem;} 
+.compliance-col h5{font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:0.75rem;}
+.compliance-col ul{list-style:none;}
+.compliance-col ul li{font-size:0.85rem;color:var(--white-muted);padding:0.3rem 0;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:0.5rem;}
+.compliance-col ul li:last-child{border-bottom:none;}
+.status-tag{font-size:0.65rem;padding:0.15rem 0.5rem;border-radius:2px;border:1px solid;flex-shrink:0;align-self:flex-start;margin-top:0.1rem;}
+.st-required{background:rgba(201,168,76,0.1);border-color:var(--gold-dark);color:var(--gold);}
+.st-optional{background:rgba(255,255,255,0.04);border-color:var(--black-border);color:var(--white-muted);}
+.st-pending{background:rgba(255,200,0,0.08);border-color:#8B6914;color:#C9A84C;}
+@media(max-width:768px){.compliance-grid{grid-template-columns:1fr;}}
+</style>
+
+<script>
+const COMPLIANCE = [
+  {
+    flag:'🇦🇪', name:'UAE (Dubai) — VARA', score:95,
+    summary:'Most comprehensive crypto regulatory regime globally. VARA issues activity-specific licences.',
+    licensing:['VARA Full Market Product (FMP) Licence','Category-based: Exchange, Broker-Dealer, Custody, etc.','DIFC: DFSA Digital Asset licence','ADGM: FSRA Financial Services Permission','Capital: AED 1M–10M+ depending on activity','Timeline: 12–18 months','Annual renewal + ongoing supervision fees'],
+    aml:['AML/CFT policy mandatory (CBUAE standards)','FATF Travel Rule: all transfers >AED 3,500','Enhanced KYC for PEPs and high-risk customers','Sanctions screening (OFAC, UN, UAE lists)','SAR filing to FCIU within 30 days','Annual AML audit required','Transaction monitoring system mandatory'],
+    other:['Technology governance framework','Cybersecurity policy (VARA/NESA standards)','Client asset segregation (VARA custody rules)','Insurance or financial buffer requirement','Quarterly regulatory reporting','Consumer complaint mechanism','Public disclosure of fees and terms']
+  },
+  {
+    flag:'🇸🇬', name:'Singapore — MAS', score:92,
+    summary:'Payment Services Act 2019 governs crypto. MAS Major Payment Institution licence required for most exchanges.',
+    licensing:['Major Payment Institution (MPI) Licence for DPT services','S$250,000 base capital minimum','Physical presence in Singapore mandatory','Fit-and-proper assessment for directors and 10%+ shareholders','Representative/director must be Singapore resident','Timeline: 6–12 months','Annual licence fee S$15,000–S$100,000'],
+    aml:['MAS Notice PSN02 — AML/CFT requirements','CDD (Customer Due Diligence) for all customers','Enhanced CDD for transactions above S$5,000','FATF Travel Rule via MAS Notice PSN08','STR filing to STRO (Suspicious Transaction Report Office)','PEP screening mandatory','Record retention: 5 years minimum'],
+    other:['MAS Technology Risk Management Guidelines','Retail consumer risk warnings mandatory','Advertising restrictions (Oct 2022+)','Prohibition on price incentives for retail trading','Custody: client assets must be segregated','Annual audit by MAS-approved auditor','Incident reporting within 1 hour for P1 incidents']
+  },
+  {
+    flag:'🇨🇭', name:'Switzerland — FINMA', score:90,
+    summary:'DLT Act 2021 + FINMA guidelines provide clear framework. Banking licence required for custody of client funds.',
+    licensing:['FinTech Licence (deposits up to CHF 100M, limited services)','Banking Licence for full custody services','VQF/PolyReg membership as SRO for AML compliance','FINMA no-action letters available for novel activities','FinTech Sandbox: test without licence','Capital: CHF 300K (FinTech) to CHF 10M+ (Banking)','Timeline: 6–18 months'],
+    aml:['AMLA (Anti-Money Laundering Act) compliance','FINMA AML Ordinance 2022','SRO membership mandatory (VQF, PolyReg, or ARIF)','Identity verification for all customers','Swiss sanctions screening (SECO lists)','MROS reporting (Money Laundering Reporting Office)','High-value transaction (CHF 100K+) enhanced DD'],
+    other:['FINMA Blockchain/DLT guidance 2018 (still applicable)','Ledger-based securities framework (DLT Act 2021)','Insolvency segregation for client crypto assets','Data Protection Act (revDSG) compliance','Swiss bankers\' association operational standards','Cybersecurity incident reporting to NCSC']
+  },
+  {
+    flag:'🇰🇾', name:'Cayman Islands — CIMA', score:89,
+    summary:'VASP Act 2020 provides registration/licensing framework. Primarily used as holding/issuer jurisdiction.',
+    licensing:['VASP Registration (for Cayman-marketed services)','Virtual Asset Trading Platform Licence','Virtual Asset Custodian Licence','Capital: USD 100K–500K depending on licence type','Physical presence not required for registration','CIMA supervised entity status','Timeline: 3–6 months'],
+    aml:['Proceeds of Crime Act compliance','CIMA AML Regulations 2020','Customer identification for all clients','Enhanced DD for high-risk/politically exposed persons','FATF Travel Rule for licensed VASPs','MLRO (Money Laundering Reporting Officer) appointment','Annual AML/CFT risk assessment'],
+    other:['CIMA supervisory fees','Data Protection Act compliance','Common Reporting Standard (CRS/FATCA) for funds','Registered agent in Cayman mandatory','No ongoing physical presence requirement','Substance requirements limited for pure holding structures','Company Registry filings and annual returns']
+  },
+  {
+    flag:'🇪🇺', name:'EU — MiCA', score:83,
+    summary:'MiCA creates unified licensing across 27 states. CASP authorisation enables single passport.',
+    licensing:['CASP Authorisation from national NCA (e.g. BaFin, AMF, CBI)','Whitepaper requirement for token issuance','Passporting: one licence, 27 countries','Additional requirements for "significant" CASPs (ESMA oversight)','Capital: €50K–€150K minimum (activity-dependent)','Timeline: 3–6 months (post-application receipt)','Annual supervision fees vary by NCA'],
+    aml:['6AMLD compliance across all member states','AMLA direct supervision for largest CASPs (from 2025)','Transfer of Funds Regulation (TFR) — Travel Rule for all crypto transfers','Unhosted wallet due diligence above €1,000','Beneficial ownership register filing','National FIU (e.g. Tracfin, FIU-NL) reporting','5-year record retention minimum'],
+    other:['MiCA: consumer complaint mechanism mandatory','DORA (Digital Operational Resilience Act) from Jan 2025','ICT risk management framework required','Third-party provider contractual requirements (DORA)','Quarterly and annual CASP reporting to NCA','ESMA regulatory technical standards (ongoing updates)','MiCA: prohibition on excessive fees for redemption']
+  },
+  {
+    flag:'🇬🇧', name:'United Kingdom — FCA', score:80,
+    summary:'Two-step regime: AML registration now, full FCA authorisation incoming under FSMA 2023 framework.',
+    licensing:['Cryptoasset AML Registration under MLRs 2017','Full FCA Authorisation incoming (Financial Services and Markets Act 2023)','EMI Licence for e-money/stablecoin services','Current: <50% application approval rate','Capital: £50K–£1M+ for full authorisation (expected)','Timeline: 12–18 months for full registration','FCA Annual Fees based on income'],
+    aml:['UK MLR 2017 (as amended) compliance','FCA Financial Crime Guide for cryptoassets','CDD for all customers + enhanced for high-risk','UK sanctions screening (OFSI lists)','NCA SAR submission via SARs Online','Transaction monitoring: risk-based approach','Crypto Travel Rule: PSR 2017 extension (effective 2023)'],
+    other:['Financial Promotions Regime (Oct 2023): prominent risk warnings','FCA Principles for Business (incoming)','Consumer Duty Act compliance for retail crypto','Data Protection Act 2018/UK GDPR','Operational resilience framework','FCA supervisory relationship management','Inclusion in FCA Connect portal']
+  },
+  {
+    flag:'🇭🇰', name:'Hong Kong — SFC', score:78,
+    summary:'AMLO VASP licensing active since June 2023. Retail trading permitted for licensed exchanges.',
+    licensing:['VASP Licence from SFC (mandatory for centralised exchanges)','Transition period ended March 2024','Retail access permitted for licensed VASPs','SFC Type 1 (dealing) + Type 7 (custody) licences also used','Capital: HKD 5M minimum','Timeline: 9–15 months','Annual SFC fees based on turnover'],
+    aml:['AMLO (Anti-Money Laundering Ordinance) compliance','SFC AML/CFT Circulars for VASPs','CDD: identity verification + ongoing monitoring','Sanctions screening (OFAC, UN, HK lists)','HKMA coordination for stablecoin-related AML','JFIU (Joint Financial Intelligence Unit) reporting','SFC-required AML audit annually'],
+    other:['Suitability assessment for retail customers','Product due diligence for listed tokens','Proof of reserves reporting','Insurance or compensation fund requirement','Client asset segregation','Incident reporting to SFC within 2 hours','HKMA stablecoin regime incoming 2025']
+  },
+  {
+    flag:'🇯🇵', name:'Japan — FSA', score:67,
+    summary:'World\'s most mature exchange licensing. Strict token listing controls. High compliance burden.',
+    licensing:['Crypto Asset Exchange Service Provider (CAESP) Registration','FSA review: 6–12 months','Capital: ¥10M minimum','Majority director must be Japanese resident','Cold wallet requirement: 95%+ of assets','Annual FSA inspection','JVCEA self-regulatory membership required'],
+    aml:['Act on Prevention of Transfer of Criminal Proceeds','FSA AML/CFT Guidelines 2022','Identity verification for all transactions','Real-name bank account linking required','JAFIC (Japan FIU) reporting','Strict transfer monitoring','FATF Travel Rule: domestic TRACER system'],
+    other:['JVCEA listing review for all tokens','FSA pre-consultation required for new products','Cold/hot wallet security standards','Cybersecurity framework (FSA guidelines)','Leverage limits: 2x for retail','Annual audited financial statements','Customer asset segregation and proof of reserves']
+  },
+  {
+    flag:'🇦🇺', name:'Australia — ASIC/AUSTRAC', score:72,
+    summary:'AUSTRAC registration + incoming ASIC licensing regime. Financial services licence for derivatives.',
+    licensing:['Digital Currency Exchange (DCE) Registration with AUSTRAC','AFS Licence (ASIC) for crypto derivatives and managed funds','Incoming: comprehensive licensing regime from 2024','Capital: A$1M minimum (proposed)','Timeline: 3–6 months (AUSTRAC), 12+ months (ASIC)','Industry code of conduct (ADCA member)'],
+    aml:['AML/CTF Act 2006 + Rules','AUSTRAC registration and ongoing reporting','KYC: 100-point identity check standard','IFTIs: International Funds Transfer Instructions reporting','Suspicious Matter Reports to AUSTRAC','FATF Travel Rule: AUSTRAC guidance 2023','Annual compliance report to AUSTRAC'],
+    other:['ASX rules for tokenised securities','ASIC Information Sheet 225 (crypto guidance)','Design and Distribution Obligations for retail products','Breach reporting obligations','Internal dispute resolution (EDR scheme)','Director liability for AML failures','State-based money services dealer registration']
+  },
+  {
+    flag:'🇧🇭', name:'Bahrain — CBB', score:85,
+    summary:'CBB Crypto-Asset Module (CRA) provides clear framework. Lower costs than UAE with comparable credibility.',
+    licensing:['CBB Category 1 or 2 Crypto-Asset Licence','Regulatory Sandbox available (0–12 months pre-licence)','Capital: BD 25,000–300,000 (USD 66K–800K)','At least 1 director resident in Bahrain','Timeline: 3–6 months','CBB annual supervision fees','Physical office in Bahrain required'],
+    aml:['Volume 6 CBB Rulebook: AML/CFT module','CDD for all customers','Enhanced CDD for high-risk and PEPs','Bahrain Financial Intelligence Unit (FIU) reporting','Sanctions screening: UN, OFAC, GCC lists','FATF Travel Rule compliance','AML compliance officer mandatory'],
+    other:['CBB technology risk standards','Consumer protection rules (transparency, fees)','Client asset segregation','Cybersecurity incident reporting','Quarterly regulatory returns','Annual external audit','Bahrain Central Securities Depository integration (for tokenised securities)']
+  },
+  {
+    flag:'🇱🇹', name:'Lithuania — Bank of Lithuania', score:76,
+    summary:'EU\'s fastest VASP registration. EMI licences enable crypto-friendly banking. Popular EU crypto gateway.',
+    licensing:['VASP Operator List (mandatory since Nov 2020)','Electronic Money Institution (EMI) Licence for payment services','CASPit platform for VASP registration','Capital: €125K minimum (EMI); VASP: no minimum','Timeline: 1–3 months (VASP list); 6–12 months (EMI)','MiCA CASP authorisation transitioning from VASP list','Annual FNTT (FIU) oversight'],
+    aml:['AMLL (Anti-Money Laundering Law) compliance','FNTT supervision for crypto businesses','CDD and enhanced CDD requirements','Beneficial ownership registry filing','STR filing to FNTT','EU Funds Transfer Regulation (TFR) Travel Rule','5-year record-keeping obligation'],
+    other:['Bank of Lithuania FinTech entry guidelines','GDPR/BDAR compliance (Lithuania DPA)','MiCA transition: CASP authorisation required by mid-2026','Operational resilience (DORA from 2025)','EMI: safeguarding client funds in segregated accounts','Quarterly reporting to Bank of Lithuania']
+  },
+  {
+    flag:'🇬🇮', name:'Gibraltar — GFSC', score:70,
+    summary:'World\'s first DLT licensing regime (2018). English common law. No EU passport post-Brexit.',
+    licensing:['DLT Provider Licence from GFSC','9 Regulatory Principles-based regime','Capital: £100K minimum + solvency buffer','Fit-and-proper assessment for controllers and officers','Timeline: 3–6 months','Annual GFSC supervisory fees','Physical presence in Gibraltar required'],
+    aml:['Proceeds of Crime Act 2015 compliance','GFSC AML/CFT Guidance Notes','CDD for all customers','GFSC Sanctions Guidance (UK lists post-Brexit)','AFIS (Gibraltar FIU) reporting','Risk-based transaction monitoring','Annual AML/CFT independent audit'],
+    other:['GFSC DLT 9 Principles (customer protection, financial crime etc.)','Data Protection Act 2004 (GDPR-equivalent)','Operational resilience requirements','Cyber incident reporting to GFSC','Annual regulatory reporting','No EU passporting (post-Brexit)','Potential UK FCA equivalence for some services']
+  },
+  {
+    flag:'🇲🇹', name:'Malta — MFSA', score:74,
+    summary:'VFA Act 2018 transitioning to MiCA. EU passport available. 5% effective corp tax via participation exemption.',
+    licensing:['Virtual Financial Assets (VFA) Licence (transitioning to MiCA CASP)','VFA Agent requirement for all VFA applications','MFSA 4-class licence structure','Capital: €730K–€750K (Class 3/4)','Timeline: 6–12 months','Annual MFSA supervisory fees','MiCA CASP authorisation from 2024 onwards'],
+    aml:['PMLA (Prevention of Money Laundering Act)','FIAU Implementing Procedures for VFA','CDD: risk-based approach','Enhanced monitoring for PEPs and high-risk countries','FIAU reporting obligations','FATF Travel Rule (EU TFR)','Annual compliance certificate to FIAU'],
+    other:['MFSA Consumer Protection rules','Investor compensation scheme','Client asset segregation','Technology Arrangements review','Data Protection (GDPR via IDPC)','Operational continuity requirements','Annual independent audit of AML procedures']
+  },
+  {
+    flag:'🇮🇪', name:'Ireland — Central Bank', score:74,
+    summary:'EU MiCA member. 12.5% corporate tax. Central Bank VASP registration + incoming MiCA authorisation.',
+    licensing:['VASP Registration (Central Bank, since 2021)','Incoming: MiCA CASP Authorisation from 2024','EMI/PI Licence for payment-related crypto services','Capital: €125K (EMI); MiCA minimum pending','Timeline: 6–18 months','Central Bank Annual Levy','Must demonstrate substance in Ireland'],
+    aml:['Criminal Justice (Money Laundering) Act 2010 (as amended)','Central Bank AML/CFT guidance','CDD for all customers','ROS (Revenue Online Services) beneficial ownership register','FIU Ireland (Garda) reporting','EU TFR Travel Rule compliance','Regular compliance monitoring by Central Bank'],
+    other:['GDPR compliance (DPC — Data Protection Commission)','Consumer Protection Code (incoming for crypto)','MiCA whitepaper requirements','DORA from Jan 2025','Central Bank supervised entity relationship','Annual compliance report','12.5% corporation tax on Irish-sourced profits']
+  },
+  {
+    flag:'🇻🇬', name:'British Virgin Islands — FSC', score:71,
+    summary:'VASP Act 2023 modernises framework. Zero tax jurisdiction. Primarily for holding/issuer structures.',
+    licensing:['VASP Licence under VASP Act 2023','Registration for lower-risk activities','FSC application and annual fees','Capital requirements under review (2024)','Timeline: 3–6 months','Licensed manager/administrator required','Annual FSC compliance return'],
+    aml:['Proceeds of Criminal Conduct Act compliance','Financial Investigation Agency reporting','AML/CFT Code of Practice 2022','CDD for all customers and UBOs','Sanctions screening (UK/UN/US lists)','STR filing to FIA','AML Officer appointment required'],
+    other:['BVI Business Companies Act compliance','Data Protection Act 2021','Annual return and government fees','Registered agent required','Substance requirements for IP-holding structures','No tax on income, capital gains, or dividends','Limited banking options — offshore bank account critical']
+  },
+  {
+    flag:'🇵🇹', name:'Portugal — Banco de Portugal', score:72,
+    summary:'EU member with NHR tax regime for new residents. MiCA CASP authorisation pathway active.',
+    licensing:['VASP Registration with Banco de Portugal (Law 83/2017)','Incoming: MiCA CASP Authorisation','AML registration: low barrier','Capital requirements to increase under MiCA','Timeline: 3–6 months (registration); 6–12 (MiCA)','Banco de Portugal oversight fees'],
+    aml:['Law 83/2017 (AML/CFT for VASPs)','CDD: identity verification required','Banco de Portugal supervisory guidelines','DCIAP (FIU Portugal) STR reporting','Sanctions screening (EU consolidated list)','FATF Travel Rule (EU TFR)','Annual compliance declaration'],
+    other:['GDPR/CNPD compliance','NHR regime: 10% flat tax for new residents (personal)','Capital gains now 28% (Jan 2023 onwards)','MiCA transition requirements','DORA from Jan 2025','Growing Lisbon fintech hub ecosystem']
+  },
+  {
+    flag:'🇵🇦', name:'Panama — SBP', score:64,
+    summary:'Law 129 (2022) provides crypto legal framework. Territorial tax system. USD economy.',
+    licensing:['Digital Asset Service Provider Registration (Law 129)','SBP (Superintendencia de Bancos) oversight','Capital: USD 100,000 minimum','Local director required','Timeline: 3–6 months','Annual registry fee','Complementary financial licence may be required'],
+    aml:['Law 23/2015 (AML) + Law 129 provisions','UAF (Unidad de Análisis Financiero) reporting','CDD for all customers','Enhanced CDD for high-risk customers and PEPs','Sanctions screening: UN, OFAC, INTERPOL','STR filing obligation','Internal AML officer required'],
+    other:['Territorial tax: foreign-source income tax exempt','Panama Fintech Association membership (optional)','Data protection compliance (Law 81/2019)','Consumer protection obligations','Annual financial statements','Law 129 relatively basic — legal opinion recommended','USD-denominated operations: no FX risk']
+  },
+  {
+    flag:'🇸🇻', name:'El Salvador — BCR', score:62,
+    summary:'Bitcoin law 2021 (now voluntary). 0% CGT. Digital Asset Law creates registration pathway.',
+    licensing:['Digital Asset Service Provider registration','BCR (Banco Central de Reserva) oversight','Chivo partner accreditation (for Bitcoin payment integration)','Capital requirements: under regulatory development','Timeline: 2–4 months','Low regulatory fees','Bitcoin accepted for taxes and government payments (still)'],
+    aml:['Anti-Money Laundering Law compliance','SSF (Superintendencia del Sistema Financiero) oversight','CDD for crypto transactions','UAF (Unidad de Investigación Financiera) reporting','FATF recommendations (El Salvador under monitoring)','Basic transaction monitoring','Beneficial owner registration'],
+    other:['Bitcoin Law: acceptance now voluntary (post-IMF 2024 deal)','0% capital gains tax on crypto','Tax in USD (dollarized economy)','BCR strategic reserve of Bitcoin','Limited banking infrastructure','Internet connectivity improving','High crime risk — physical security concerns']
+  },
+  {
+    flag:'🇲🇭', name:'Marshall Islands — ROC', score:65,
+    summary:'World\'s first DAO-specific legislation. On-chain governance legally recognised. Zero taxes.',
+    licensing:['DAO LLC Incorporation under DAO Act 2022','No VASP licensing requirement for most activities','Registrar of Corporations filing','Capital: no minimum requirement','Timeline: 1–2 weeks','Annual fees under USD 1,000','No physical presence required'],
+    aml:['Financial Institutions Act compliance','FIU Marshall Islands reporting (limited capacity)','Basic CDD requirements','FATF engagement ongoing','AML programme recommended (not always required)','International cooperation treaties in place'],
+    other:['DAO Act: on-chain governance legally binding','Smart contracts can constitute operating agreement','Token holders = legal members','0% all taxes (no income, CGT, or corporate tax)','US dollar currency','US federal AML laws apply to US persons using the DAO','Very limited banking access — Cayman or Singapore bank accounts typically used']
+  },
+  {
+    flag:'🇧🇸', name:'Bahamas — SCB', score:60,
+    summary:'DARE Act (2020) provides framework. SCB tightened post-FTX. 0% taxes. USD economy.',
+    licensing:['Digital Asset Business Licence (DARE Act 2020)','SCB (Securities Commission) oversight','Capital: BSD 250,000 minimum','Physical presence in Bahamas required','Timeline: 6–12 months (post-FTX scrutiny)','Annual SCB fees','SCB now conducts thorough due diligence'],
+    aml:['Financial Intelligence Unit (FIU Bahamas) oversight','DARE Act AML provisions','CDD for all customers','Enhanced scrutiny for high-value clients','STR reporting obligation','Sanctions screening (UN, OFAC)','Annual AML compliance audit'],
+    other:['0% taxes (income, CGT, corporate)','USD-based economy','English common law','SCB significantly enhanced oversight post-FTX (2023)','Reputation repair ongoing — higher due diligence burden','Insurance requirement for client asset protection','Proof of reserves reporting encouraged']
+  }
+];
+
+function renderCompliance(data) {
+  const container = document.getElementById('complianceAccordion');
+  container.innerHTML = data.map((c, i) => `
+    <div class="acc-item fade-in" id="acc${i}">
+      <div class="acc-header" onclick="toggleAcc(${i})">
+        <div style="font-size:2rem;">${c.flag}</div>
+        <div>
+          <h3 style="font-size:1.05rem;margin-bottom:0.2rem;">${c.name}</h3>
+          <p style="font-size:0.8rem;margin:0;">${c.summary}</p>
+        </div>
+        <div style="margin-left:auto;text-align:right;flex-shrink:0;margin-right:1rem;">
+          <span style="font-size:1.4rem;font-family:var(--font-display);font-weight:700;color:var(--gold);">${c.score}</span>
+          <span style="font-size:0.7rem;color:var(--white-muted);display:block;">/ 100</span>
+        </div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <div class="compliance-grid">
+          <div class="compliance-col">
+            <h5>🏛️ Licensing Requirements</h5>
+            <ul>${c.licensing.map(l => `<li><span class="status-tag st-required">REQ</span>${l}</li>`).join('')}</ul>
+          </div>
+          <div class="compliance-col">
+            <h5>🔍 AML/KYC Obligations</h5>
+            <ul>${c.aml.map(a => `<li><span class="status-tag st-required">REQ</span>${a}</li>`).join('')}</ul>
+          </div>
+          <div class="compliance-col">
+            <h5>📋 Other Regulatory Duties</h5>
+            <ul>${c.other.map(o => `<li><span class="status-tag st-optional">NOTE</span>${o}</li>`).join('')}</ul>
+          </div>
+        </div>
+        <div style="padding:0 2rem 1.5rem;display:flex;gap:1rem;flex-wrap:wrap;">
+          <a href="contact.html" class="btn btn-gold" style="font-size:0.85rem;padding:0.6rem 1.25rem;">Get ${c.name.split('—')[0].trim()} Legal Advice →</a>
+          <a href="crypto-countries.html" class="btn btn-ghost" style="font-size:0.85rem;padding:0.6rem 1.25rem;">Compare Countries</a>
+        </div>
+      </div>
+    </div>`).join('');
+
+  document.querySelectorAll('.fade-in').forEach(el => {
+    const obs = new IntersectionObserver(e => { if(e[0].isIntersecting){el.classList.add('visible');obs.unobserve(el);} },{threshold:0.05});
+    obs.observe(el);
+  });
+}
+
+function toggleAcc(i) {
+  const item = document.getElementById('acc' + i);
+  item.classList.toggle('open');
+}
+
+function filterCompliance() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  if (!q) { renderCompliance(COMPLIANCE); return; }
+  const filtered = COMPLIANCE.filter(c =>
+    c.name.toLowerCase().includes(q) ||
+    c.summary.toLowerCase().includes(q) ||
+    c.licensing.some(l => l.toLowerCase().includes(q)) ||
+    c.aml.some(a => a.toLowerCase().includes(q)) ||
+    c.other.some(o => o.toLowerCase().includes(q))
+  );
+  renderCompliance(filtered);
+}
+
+document.addEventListener('DOMContentLoaded', () => renderCompliance(COMPLIANCE));
+</script>
+</body>
+</html>

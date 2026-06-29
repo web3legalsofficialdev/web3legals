@@ -1,0 +1,2241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web3Legals CMS — Admin Panel</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ── BASE ─────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+:root{
+  --gold:#C9A84C;--gold-light:#E8C97A;--gold-dark:#A07830;--gold-muted:rgba(201,168,76,.1);
+  --black:#0A0A0A;--black-soft:#111111;--black-card:#161616;--black-border:#2A2A2A;
+  --white:#FFFFFF;--white-soft:#F5F5F0;--white-muted:#AAAAAA;
+  --danger:#e74c3c;--success:#2ecc71;--warn:#f39c12;--info:#3498db;
+  --font-display:'Playfair Display',Georgia,serif;
+  --font-body:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --radius:4px;--radius-lg:8px;--transition:.22s ease;
+  --sidebar:240px;--shadow:0 4px 24px rgba(0,0,0,.5);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:15px;scroll-behavior:smooth}
+body{background:var(--black);color:var(--white);font-family:var(--font-body);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3,h4,h5{font-family:var(--font-display);line-height:1.25;color:var(--white)}
+p{color:var(--white-muted)}
+a{color:var(--gold);text-decoration:none}
+a:hover{color:var(--gold-light)}
+input,textarea,select,button{font-family:var(--font-body)}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--black-soft)}
+::-webkit-scrollbar-thumb{background:var(--black-border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--gold-dark)}
+
+/* ── LOGIN ────────────────────────────────────────────── */
+#loginScreen{
+  position:fixed;inset:0;background:var(--black);
+  display:flex;align-items:center;justify-content:center;z-index:9999;
+}
+.login-box{
+  background:var(--black-card);border:1px solid var(--black-border);
+  border-radius:var(--radius-lg);padding:2.5rem;width:100%;max-width:400px;
+  box-shadow:var(--shadow);
+}
+.login-logo{font-family:var(--font-display);font-size:1.5rem;font-weight:700;margin-bottom:2rem;display:flex;align-items:center;gap:.75rem}
+.login-logo .logo-box{width:36px;height:36px;background:linear-gradient(135deg,var(--gold-dark),var(--gold));border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--black);font-weight:900}
+.login-logo span{color:var(--gold)}
+
+/* ── APP SHELL ────────────────────────────────────────── */
+#appShell{display:none;min-height:100vh}
+.cms-layout{display:flex;min-height:100vh}
+
+/* ── SIDEBAR ──────────────────────────────────────────── */
+.sidebar{
+  width:var(--sidebar);background:var(--black-soft);border-right:1px solid var(--black-border);
+  display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;
+  transition:transform var(--transition);overflow-y:auto;
+}
+.sidebar-header{padding:1.25rem 1rem;border-bottom:1px solid var(--black-border);display:flex;align-items:center;gap:.6rem;flex-shrink:0}
+.sidebar-logo{font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:var(--white)}
+.sidebar-logo span{color:var(--gold)}
+.logo-box-sm{width:28px;height:28px;background:linear-gradient(135deg,var(--gold-dark),var(--gold));border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--black);font-weight:900;flex-shrink:0}
+.sidebar-nav{flex:1;padding:.75rem 0}
+.nav-section-label{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--white-muted);padding:.5rem 1rem .25rem;opacity:.5}
+.nav-item{
+  display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;
+  font-size:.85rem;color:var(--white-muted);cursor:pointer;transition:all var(--transition);
+  border-left:2px solid transparent;user-select:none;
+}
+.nav-item:hover{color:var(--white);background:var(--gold-muted)}
+.nav-item.active{color:var(--gold);background:var(--gold-muted);border-left-color:var(--gold)}
+.nav-item i{width:16px;text-align:center;font-size:.8rem}
+.sidebar-footer{padding:1rem;border-top:1px solid var(--black-border);flex-shrink:0}
+.user-badge{display:flex;align-items:center;gap:.75rem;padding:.6rem;background:var(--black-card);border-radius:var(--radius);border:1px solid var(--black-border)}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dark),var(--gold));display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--black);flex-shrink:0;overflow:hidden}
+.user-avatar img{width:100%;height:100%;object-fit:cover}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:.8rem;font-weight:600;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-role{font-size:.65rem;color:var(--gold);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.05em}
+.logout-btn{background:none;border:none;color:var(--white-muted);cursor:pointer;padding:.25rem;transition:color var(--transition);font-size:.85rem}
+.logout-btn:hover{color:var(--danger)}
+
+/* ── MAIN CONTENT ─────────────────────────────────────── */
+.main-content{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{
+  height:58px;background:rgba(10,10,10,.95);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--black-border);display:flex;align-items:center;
+  padding:0 1.5rem;gap:1rem;position:sticky;top:0;z-index:50;
+}
+.topbar-title{font-family:var(--font-display);font-size:1.1rem;font-weight:700;flex:1}
+.topbar-actions{display:flex;align-items:center;gap:.75rem}
+.page-content{padding:1.75rem;flex:1}
+
+/* ── PANELS ───────────────────────────────────────────── */
+.panel{display:none}
+.panel.active{display:block}
+
+/* ── CARDS ────────────────────────────────────────────── */
+.card{background:var(--black-card);border:1px solid var(--black-border);border-radius:var(--radius-lg);padding:1.5rem}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--black-border)}
+.card-title{font-family:var(--font-display);font-size:1rem;font-weight:700}
+
+/* ── STAT CARDS ───────────────────────────────────────── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem}
+.stat-card{background:var(--black-card);border:1px solid var(--black-border);border-radius:var(--radius-lg);padding:1.25rem;position:relative;overflow:hidden;transition:border-color var(--transition)}
+.stat-card:hover{border-color:var(--gold)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold-dark),var(--gold))}
+.stat-num{font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--gold)}
+.stat-label{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--white-muted);margin-top:.25rem}
+
+/* ── BUTTONS ──────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.1rem;font-size:.82rem;font-weight:600;border-radius:var(--radius);border:none;cursor:pointer;transition:all var(--transition);text-decoration:none;white-space:nowrap}
+.btn-gold{background:linear-gradient(135deg,var(--gold-dark),var(--gold));color:var(--black)}
+.btn-gold:hover{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--black);transform:translateY(-1px)}
+.btn-outline{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+.btn-outline:hover{background:var(--gold-muted)}
+.btn-ghost{background:transparent;color:var(--white-muted);border:1px solid var(--black-border)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover{background:#c0392b}
+.btn-sm{padding:.35rem .75rem;font-size:.75rem}
+.btn-icon{width:30px;height:30px;padding:0;justify-content:center;border-radius:var(--radius)}
+
+/* ── FORMS ────────────────────────────────────────────── */
+.form-group{margin-bottom:1rem}
+.form-row{display:grid;gap:1rem}
+.form-row-2{grid-template-columns:1fr 1fr}
+.form-row-3{grid-template-columns:1fr 1fr 1fr}
+.form-label{display:block;font-family:var(--font-mono);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--white-muted);margin-bottom:.4rem}
+.form-input,.form-select,.form-textarea{
+  width:100%;background:var(--black);border:1px solid var(--black-border);border-radius:var(--radius);
+  padding:.6rem .85rem;color:var(--white);font-size:.875rem;transition:border-color var(--transition);
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,168,76,.1)}
+.form-textarea{resize:vertical;min-height:100px}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23aaa'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center}
+.form-hint{font-size:.72rem;color:var(--white-muted);margin-top:.3rem}
+.char-count{font-size:.7rem;color:var(--white-muted);text-align:right;margin-top:.2rem}
+.char-count.warn{color:var(--warn)}
+.char-count.over{color:var(--danger)}
+.input-with-btn{display:flex;gap:.5rem}
+.input-with-btn .form-input{flex:1}
+
+/* ── TABLES ───────────────────────────────────────────── */
+.table-wrap{overflow-x:auto;margin:-1px}
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--black);padding:.65rem 1rem;text-align:left;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);border-bottom:2px solid var(--gold-dark);white-space:nowrap}
+tbody td{padding:.7rem 1rem;border-bottom:1px solid var(--black-border);font-size:.82rem;color:var(--white-muted);vertical-align:middle}
+tbody tr:hover td{background:var(--gold-muted);color:var(--white)}
+tbody tr:last-child td{border-bottom:none}
+.td-actions{display:flex;gap:.4rem;align-items:center}
+
+/* ── TAGS / BADGES ────────────────────────────────────── */
+.badge{display:inline-block;font-family:var(--font-mono);font-size:.6rem;letter-spacing:.05em;text-transform:uppercase;padding:.2rem .6rem;border-radius:2px;border:1px solid;white-space:nowrap}
+.badge-gold{background:var(--gold-muted);border-color:var(--gold-dark);color:var(--gold)}
+.badge-green{background:rgba(46,204,113,.1);border-color:rgba(46,204,113,.3);color:var(--success)}
+.badge-red{background:rgba(231,76,60,.1);border-color:rgba(231,76,60,.3);color:var(--danger)}
+.badge-gray{background:rgba(255,255,255,.04);border-color:var(--black-border);color:var(--white-muted)}
+.badge-blue{background:rgba(52,152,219,.1);border-color:rgba(52,152,219,.3);color:var(--info)}
+.badge-warn{background:rgba(243,156,18,.1);border-color:rgba(243,156,18,.3);color:var(--warn)}
+
+/* ── MODAL ────────────────────────────────────────────── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
+  z-index:1000;align-items:center;justify-content:center;padding:1rem;
+  backdrop-filter:blur(4px);
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--black-card);border:1px solid var(--black-border);
+  border-radius:var(--radius-lg);width:100%;max-width:780px;max-height:90vh;
+  display:flex;flex-direction:column;box-shadow:var(--shadow);
+}
+.modal-lg{max-width:1100px}
+.modal-sm{max-width:480px}
+.modal-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--black-border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-header h3{font-size:1rem;margin:0}
+.modal-close{background:none;border:none;color:var(--white-muted);cursor:pointer;font-size:1.2rem;padding:.25rem;line-height:1;transition:color var(--transition)}
+.modal-close:hover{color:var(--white)}
+.modal-body{padding:1.5rem;overflow-y:auto;flex:1}
+.modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--black-border);display:flex;justify-content:flex-end;gap:.75rem;flex-shrink:0}
+
+/* ── TABS ─────────────────────────────────────────────── */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--black-border);margin-bottom:1.5rem;overflow-x:auto}
+.tab-btn{padding:.6rem 1.1rem;font-size:.8rem;font-weight:500;color:var(--white-muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all var(--transition);white-space:nowrap}
+.tab-btn:hover{color:var(--white)}
+.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── RICH TEXT EDITOR ─────────────────────────────────── */
+.rte-toolbar{
+  background:var(--black);border:1px solid var(--black-border);border-bottom:none;
+  border-radius:var(--radius) var(--radius) 0 0;padding:.5rem;
+  display:flex;flex-wrap:wrap;gap:.25rem;align-items:center;
+}
+.rte-btn{
+  background:none;border:1px solid transparent;color:var(--white-muted);
+  padding:.3rem .5rem;border-radius:var(--radius);cursor:pointer;font-size:.8rem;
+  transition:all var(--transition);min-width:28px;text-align:center;
+}
+.rte-btn:hover,.rte-btn.active{background:var(--gold-muted);border-color:var(--gold-dark);color:var(--gold)}
+.rte-sep{width:1px;height:20px;background:var(--black-border);margin:0 .25rem}
+.rte-select{background:var(--black-soft);border:1px solid var(--black-border);color:var(--white);padding:.25rem .5rem;border-radius:var(--radius);font-size:.75rem;cursor:pointer}
+.rte-body{
+  background:var(--black);border:1px solid var(--black-border);
+  border-radius:0 0 var(--radius) var(--radius);
+  min-height:280px;padding:1rem;color:var(--white);font-size:.9rem;line-height:1.7;
+  outline:none;overflow-y:auto;
+}
+.rte-body:focus{border-color:var(--gold)}
+.rte-body h1,.rte-body h2,.rte-body h3{font-family:var(--font-display);margin:.5rem 0}
+.rte-body p{margin:.5rem 0;color:var(--white)}
+.rte-body ul,.rte-body ol{padding-left:1.5rem;color:var(--white-muted)}
+.rte-body blockquote{border-left:3px solid var(--gold);padding:.5rem 1rem;margin:.5rem 0;background:var(--gold-muted);color:var(--white-muted)}
+.rte-body a{color:var(--gold)}
+.rte-body table{border-collapse:collapse;width:100%}
+.rte-body table td,.rte-body table th{border:1px solid var(--black-border);padding:.4rem .6rem;color:var(--white-muted)}
+.rte-body code{background:var(--black-soft);padding:.1rem .3rem;border-radius:2px;font-family:var(--font-mono);font-size:.85em;color:var(--gold-light)}
+.rte-body pre{background:var(--black-soft);border:1px solid var(--black-border);border-radius:var(--radius);padding:1rem;overflow-x:auto;margin:.5rem 0}
+
+/* ── SEO PREVIEW ──────────────────────────────────────── */
+.seo-preview{background:var(--black);border:1px solid var(--black-border);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1rem}
+.seo-preview-url{font-size:.75rem;color:var(--success);margin-bottom:.2rem;word-break:break-all}
+.seo-preview-title{font-size:1.1rem;color:#8ab4f8;margin-bottom:.2rem;cursor:pointer;line-height:1.3}
+.seo-preview-title:hover{text-decoration:underline}
+.seo-preview-desc{font-size:.82rem;color:#bdc1c6;line-height:1.5}
+
+/* ── MEDIA MANAGER ────────────────────────────────────── */
+.media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.75rem}
+.media-item{background:var(--black-card);border:1px solid var(--black-border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all var(--transition);position:relative}
+.media-item:hover{border-color:var(--gold)}
+.media-item.selected{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
+.media-thumb{height:110px;display:flex;align-items:center;justify-content:center;background:var(--black);overflow:hidden}
+.media-thumb img{width:100%;height:100%;object-fit:cover}
+.media-thumb .file-icon{font-size:2.5rem;color:var(--white-muted)}
+.media-info{padding:.5rem;border-top:1px solid var(--black-border)}
+.media-name{font-size:.7rem;color:var(--white-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.media-size{font-size:.62rem;color:var(--black-border);font-family:var(--font-mono)}
+.media-item-actions{position:absolute;top:.35rem;right:.35rem;display:none;gap:.25rem}
+.media-item:hover .media-item-actions{display:flex}
+
+/* ── DROP ZONE ────────────────────────────────────────── */
+.drop-zone{
+  border:2px dashed var(--black-border);border-radius:var(--radius-lg);
+  padding:2.5rem;text-align:center;cursor:pointer;transition:all var(--transition);
+  background:var(--black);
+}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--gold);background:var(--gold-muted)}
+.drop-zone i{font-size:2rem;color:var(--white-muted);margin-bottom:.75rem;display:block}
+.drop-zone p{font-size:.85rem;margin-bottom:.5rem}
+.drop-zone span{font-size:.75rem;color:var(--white-muted)}
+
+/* ── IMAGE UPLOAD PREVIEW ─────────────────────────────── */
+.img-preview-wrap{position:relative;width:100%;border-radius:var(--radius);overflow:hidden;background:var(--black);border:1px solid var(--black-border)}
+.img-preview-wrap img{width:100%;height:180px;object-fit:cover;display:block}
+.img-preview-remove{position:absolute;top:.5rem;right:.5rem;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:.8rem;display:flex;align-items:center;justify-content:center}
+.img-placeholder{height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;cursor:pointer;color:var(--white-muted);font-size:.82rem}
+.img-placeholder i{font-size:1.5rem}
+.img-placeholder:hover{color:var(--gold)}
+
+/* ── TAGS INPUT ───────────────────────────────────────── */
+.tags-input-wrap{background:var(--black);border:1px solid var(--black-border);border-radius:var(--radius);padding:.4rem;display:flex;flex-wrap:wrap;gap:.35rem;min-height:40px;cursor:text;transition:border-color var(--transition)}
+.tags-input-wrap:focus-within{border-color:var(--gold)}
+.tags-input-tag{background:var(--gold-muted);border:1px solid var(--gold-dark);color:var(--gold);font-size:.72rem;padding:.2rem .5rem;border-radius:2px;display:flex;align-items:center;gap:.35rem;font-family:var(--font-mono)}
+.tags-input-tag button{background:none;border:none;color:var(--gold);cursor:pointer;padding:0;font-size:.7rem;line-height:1}
+.tags-input-field{background:none;border:none;outline:none;color:var(--white);font-size:.82rem;min-width:80px;flex:1;padding:.15rem .25rem}
+
+/* ── ATTACHMENTS ──────────────────────────────────────── */
+.attachment-list{display:flex;flex-direction:column;gap:.5rem}
+.attachment-item{display:flex;align-items:center;gap:.75rem;background:var(--black);border:1px solid var(--black-border);border-radius:var(--radius);padding:.6rem .85rem}
+.attachment-icon{font-size:1.25rem;flex-shrink:0}
+.attachment-info{flex:1;min-width:0}
+.attachment-name{font-size:.8rem;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.attachment-size{font-size:.65rem;color:var(--white-muted);font-family:var(--font-mono)}
+.attachment-remove{background:none;border:none;color:var(--white-muted);cursor:pointer;padding:.25rem;transition:color var(--transition);font-size:.85rem}
+.attachment-remove:hover{color:var(--danger)}
+
+/* ── TOAST ────────────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;
+  background:var(--black-card);border:1px solid var(--gold);border-radius:var(--radius-lg);
+  padding:.85rem 1.25rem;color:var(--white);font-size:.85rem;box-shadow:var(--shadow);
+  transform:translateY(80px);opacity:0;transition:all .3s ease;max-width:320px;pointer-events:none;
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{border-color:var(--danger)}
+.toast.success{border-color:var(--success)}
+
+/* ── SEARCH BAR ───────────────────────────────────────── */
+.search-bar{position:relative}
+.search-bar i{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--white-muted);font-size:.85rem;pointer-events:none}
+.search-bar input{padding-left:2.25rem}
+
+/* ── ACCORDION / COLLAPSIBLE SEO ─────────────────────── */
+.collapsible-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:.75rem 1rem;background:var(--black);border:1px solid var(--black-border);border-radius:var(--radius);margin-bottom:.5rem;user-select:none;transition:border-color var(--transition)}
+.collapsible-header:hover{border-color:var(--gold)}
+.collapsible-header h4{font-size:.85rem;margin:0;display:flex;align-items:center;gap:.5rem}
+.collapsible-body{display:none;padding:.75rem 0}
+.collapsible-body.open{display:block}
+.collapsible-arrow{transition:transform var(--transition);font-size:.75rem;color:var(--white-muted)}
+.collapsible-header.open .collapsible-arrow{transform:rotate(180deg)}
+
+/* ── AUTHOR AVATAR ────────────────────────────────────── */
+.author-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--black-border)}
+.author-avatar-lg{width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--gold)}
+
+/* ── EMPTY STATE ──────────────────────────────────────── */
+.empty-state{text-align:center;padding:3rem 1.5rem;color:var(--white-muted)}
+.empty-state i{font-size:2.5rem;margin-bottom:1rem;display:block;opacity:.3}
+.empty-state p{font-size:.9rem}
+
+/* ── TOGGLE SWITCH ────────────────────────────────────── */
+.toggle{position:relative;display:inline-block;width:42px;height:22px}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--black-border);border-radius:11px;cursor:pointer;transition:background var(--transition)}
+.toggle-slider::before{content:'';position:absolute;height:16px;width:16px;left:3px;top:3px;background:var(--white);border-radius:50%;transition:transform var(--transition)}
+.toggle input:checked+.toggle-slider{background:var(--gold)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(20px)}
+
+/* ── DIVIDER ──────────────────────────────────────────── */
+.divider{width:48px;height:2px;background:linear-gradient(90deg,var(--gold),transparent);margin:1rem 0 1.5rem}
+
+/* ── PAGE PREVIEW ─────────────────────────────────────── */
+.preview-frame{width:100%;height:500px;border:1px solid var(--black-border);border-radius:var(--radius);background:var(--white)}
+
+/* ── RESPONSIVE ───────────────────────────────────────── */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main-content{margin-left:0}
+  .form-row-2,.form-row-3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════════════════════ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-box">W3L</div>
+      Web3<span>Legals</span> <span style="font-size:.75rem;color:var(--white-muted);font-family:var(--font-mono);margin-left:.25rem">CMS</span>
+    </div>
+    <h2 style="font-size:1.3rem;margin-bottom:.35rem">Sign in</h2>
+    <p style="font-size:.82rem;margin-bottom:1.75rem">Admin &amp; Author access</p>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="email" class="form-input" id="loginEmail" placeholder="admin@web3legals.com" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" class="form-input" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-gold" style="width:100%;justify-content:center;margin-top:.5rem" onclick="doLogin()">
+      <i class="fas fa-sign-in-alt"></i> Sign In
+    </button>
+    <p id="loginError" style="color:var(--danger);font-size:.8rem;margin-top:.75rem;display:none;text-align:center"></p>
+    <p style="font-size:.72rem;color:var(--white-muted);text-align:center;margin-top:1.25rem">Default admin: admin@web3legals.com / R9252784858r@</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     APP SHELL
+══════════════════════════════════════════════════════ -->
+<div id="appShell">
+<div class="cms-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-box-sm">W3L</div>
+      <div class="sidebar-logo">Web3<span>Legals</span></div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <!-- rendered by JS based on role -->
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-badge">
+        <div class="user-avatar" id="sidebarAvatar"></div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarName">—</div>
+          <div class="user-role" id="sidebarRole">—</div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()" title="Sign out"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <header class="topbar">
+      <button class="btn btn-ghost btn-sm" id="sidebarToggle" onclick="toggleSidebar()" style="display:none"><i class="fas fa-bars"></i></button>
+      <span class="topbar-title" id="topbarTitle">Dashboard</span>
+      <div class="topbar-actions">
+        <span style="font-size:.75rem;color:var(--white-muted)" id="topbarDate"></span>
+        <a href="../index.html" target="_blank" class="btn btn-ghost btn-sm"><i class="fas fa-external-link-alt"></i> View Site</a>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- ── DASHBOARD ──────────────────────────────── -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="stats-grid" id="dashStats"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Recent Posts</span><button class="btn btn-sm btn-ghost" onclick="showPanel('posts')">View All</button></div>
+            <div id="dashRecentPosts"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Quick Actions</span></div>
+            <div style="display:flex;flex-direction:column;gap:.6rem" id="dashQuickActions"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── POSTS ─────────────────────────────────── -->
+      <div class="panel" id="panel-posts">
+        <div class="card-header" style="margin-bottom:1rem;padding-bottom:0;border:none">
+          <div>
+            <div style="font-size:.65rem;font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.25rem">Content</div>
+            <h2 style="font-size:1.3rem">Blog Posts</h2>
+          </div>
+          <button class="btn btn-gold" onclick="openPostEditor()"><i class="fas fa-plus"></i> New Post</button>
+        </div>
+        <div class="card" style="margin-bottom:1rem">
+          <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
+            <div class="search-bar" style="flex:1;min-width:200px"><i class="fas fa-search"></i><input class="form-input" id="postsSearch" placeholder="Search posts…" oninput="renderPosts()"></div>
+            <select class="form-select" style="width:auto" id="postsFilterStatus" onchange="renderPosts()">
+              <option value="">All Status</option>
+              <option>Published</option><option>Draft</option><option>Scheduled</option>
+            </select>
+            <select class="form-select" style="width:auto" id="postsFilterCat" onchange="renderPosts()">
+              <option value="">All Categories</option>
+            </select>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Title</th><th>Author</th><th>Category</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+              <tbody id="postsTableBody"></tbody>
+            </table>
+          </div>
+          <div id="postsEmpty" class="empty-state" style="display:none"><i class="fas fa-file-alt"></i><p>No posts yet. Create your first post.</p></div>
+        </div>
+      </div>
+
+      <!-- ── PAGES ──────────────────────────────────── -->
+      <div class="panel" id="panel-pages">
+        <div class="card-header" style="margin-bottom:1rem;padding-bottom:0;border:none">
+          <div>
+            <div style="font-size:.65rem;font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.25rem">Content</div>
+            <h2 style="font-size:1.3rem">Pages</h2>
+          </div>
+          <button class="btn btn-gold" onclick="openPageEditor()"><i class="fas fa-plus"></i> New Page</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Title</th><th>Slug</th><th>Status</th><th>Updated</th><th>Actions</th></tr></thead>
+              <tbody id="pagesTableBody"></tbody>
+            </table>
+          </div>
+          <div id="pagesEmpty" class="empty-state" style="display:none"><i class="fas fa-copy"></i><p>No pages yet.</p></div>
+        </div>
+      </div>
+
+      <!-- ── MEDIA ──────────────────────────────────── -->
+      <div class="panel" id="panel-media">
+        <div class="card-header" style="margin-bottom:1rem;padding-bottom:0;border:none">
+          <div>
+            <div style="font-size:.65rem;font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.25rem">Assets</div>
+            <h2 style="font-size:1.3rem">Media Library</h2>
+          </div>
+          <div style="display:flex;gap:.5rem">
+            <button class="btn btn-gold" onclick="document.getElementById('mediaUploadInput').click()"><i class="fas fa-upload"></i> Upload</button>
+            <input type="file" id="mediaUploadInput" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip" style="display:none" onchange="handleMediaUpload(this.files)">
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:1rem">
+          <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
+            <div class="search-bar" style="flex:1;min-width:200px"><i class="fas fa-search"></i><input class="form-input" id="mediaSearch" placeholder="Search files…" oninput="renderMedia()"></div>
+            <select class="form-select" style="width:auto" id="mediaFilter" onchange="renderMedia()">
+              <option value="">All Types</option>
+              <option value="image">Images</option><option value="pdf">PDF</option>
+              <option value="doc">Word</option><option value="excel">Excel</option>
+              <option value="ppt">PowerPoint</option><option value="zip">ZIP</option>
+            </select>
+          </div>
+        </div>
+        <div class="card">
+          <div class="drop-zone" id="mediaDropZone" onclick="document.getElementById('mediaUploadInput').click()">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>Drop files here or click to upload</p>
+            <span>Images, PDF, DOC, XLS, PPT, ZIP</span>
+          </div>
+          <div style="margin-top:1.25rem">
+            <div class="media-grid" id="mediaGrid"></div>
+            <div id="mediaEmpty" class="empty-state" style="display:none"><i class="fas fa-images"></i><p>No files uploaded yet.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── AUTHORS (admin only) ───────────────────── -->
+      <div class="panel" id="panel-authors">
+        <div class="card-header" style="margin-bottom:1rem;padding-bottom:0;border:none">
+          <div>
+            <div style="font-size:.65rem;font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.25rem">Team</div>
+            <h2 style="font-size:1.3rem">Authors &amp; Users</h2>
+          </div>
+          <button class="btn btn-gold" onclick="openAuthorModal()"><i class="fas fa-user-plus"></i> Add Author</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Author</th><th>Email</th><th>Role</th><th>Posts</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="authorsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS (admin only) ──────────────────── -->
+      <div class="panel" id="panel-settings">
+        <div style="margin-bottom:1rem">
+          <div style="font-size:.65rem;font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.25rem">Config</div>
+          <h2 style="font-size:1.3rem">Settings</h2>
+        </div>
+        <div class="tabs" id="settingsTabs">
+          <button class="tab-btn active" onclick="switchTab(this,'st')">General</button>
+          <button class="tab-btn" onclick="switchTab(this,'st')">SEO Defaults</button>
+          <button class="tab-btn" onclick="switchTab(this,'st')">API Secrets</button>
+          <button class="tab-btn" onclick="switchTab(this,'st')">Security</button>
+        </div>
+        <div class="tab-panel active" id="st-0">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Site Information</span></div>
+            <div class="form-row form-row-2">
+              <div class="form-group"><label class="form-label">Site Name</label><input class="form-input" id="setSiteName" value="Web3Legals"></div>
+              <div class="form-group"><label class="form-label">Tagline</label><input class="form-input" id="setTagline" value="Premier Crypto & Blockchain Legal Counsel"></div>
+              <div class="form-group"><label class="form-label">Site URL</label><input class="form-input" id="setSiteUrl" value="https://web3legals.com"></div>
+              <div class="form-group"><label class="form-label">Contact Email</label><input class="form-input" id="setEmail" value="web3legal@gmail.com"></div>
+            </div>
+            <button class="btn btn-gold" onclick="saveSettings()"><i class="fas fa-save"></i> Save</button>
+          </div>
+        </div>
+        <div class="tab-panel" id="st-1">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Global SEO Defaults</span></div>
+            <div class="form-group"><label class="form-label">Default Meta Description</label><textarea class="form-textarea" id="setMetaDesc" rows="3">Web3Legals provides expert legal services for crypto businesses, DeFi protocols, NFT projects, and blockchain startups across 20+ global jurisdictions.</textarea></div>
+            <div class="form-group"><label class="form-label">Default OG Image URL</label><input class="form-input" id="setOgImage" placeholder="https://web3legals.com/og-image.jpg"></div>
+            <div class="form-group"><label class="form-label">Twitter Handle</label><input class="form-input" id="setTwitter" placeholder="@web3legals"></div>
+            <div class="form-group"><label class="form-label">Google Analytics ID</label><input class="form-input" id="setGA" placeholder="G-XXXXXXXXXX"></div>
+            <button class="btn btn-gold" onclick="saveSettings()"><i class="fas fa-save"></i> Save</button>
+          </div>
+        </div>
+        <div class="tab-panel" id="st-2">
+          <div class="card">
+            <div class="card-header"><span class="card-title">API Secrets</span></div>
+            <p style="font-size:.8rem;margin-bottom:1.25rem">Stored in browser localStorage. Never exposed client-side in production.</p>
+            <div class="form-row form-row-2">
+              <div class="form-group"><label class="form-label">Anthropic API Key</label><input class="form-input" type="password" id="setAnthropicKey" placeholder="sk-ant-…"></div>
+              <div class="form-group"><label class="form-label">OpenAI API Key</label><input class="form-input" type="password" id="setOpenAIKey" placeholder="sk-…"></div>
+              <div class="form-group"><label class="form-label">Zapier Webhook URL</label><input class="form-input" id="setZapier" placeholder="https://hooks.zapier.com/…"></div>
+              <div class="form-group"><label class="form-label">Cloudflare API Token</label><input class="form-input" type="password" id="setCFToken" placeholder="…"></div>
+            </div>
+            <button class="btn btn-gold" onclick="saveApiSecrets()"><i class="fas fa-save"></i> Save Secrets</button>
+          </div>
+        </div>
+        <div class="tab-panel" id="st-3">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Change Admin Password</span></div>
+            <div class="form-row form-row-2">
+              <div class="form-group"><label class="form-label">Current Password</label><input class="form-input" type="password" id="pwCurrent"></div>
+              <div class="form-group"></div>
+              <div class="form-group"><label class="form-label">New Password</label><input class="form-input" type="password" id="pwNew"></div>
+              <div class="form-group"><label class="form-label">Confirm Password</label><input class="form-input" type="password" id="pwConfirm"></div>
+            </div>
+            <button class="btn btn-gold" onclick="changePassword()"><i class="fas fa-key"></i> Change Password</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PROFILE (for authors) ──────────────────── -->
+      <div class="panel" id="panel-profile">
+        <div style="margin-bottom:1rem">
+          <div style="font-size:.65rem;font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.25rem">Account</div>
+          <h2 style="font-size:1.3rem">My Profile</h2>
+        </div>
+        <div class="card">
+          <div style="display:flex;gap:2rem;align-items:flex-start;flex-wrap:wrap">
+            <div style="text-align:center">
+              <div id="profileAvatarPreview" style="width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dark),var(--gold));display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 1rem;overflow:hidden;border:3px solid var(--gold)"></div>
+              <input type="file" id="profilePhotoInput" accept="image/*" style="display:none" onchange="previewProfilePhoto(this)">
+              <button class="btn btn-ghost btn-sm" onclick="document.getElementById('profilePhotoInput').click()"><i class="fas fa-camera"></i> Change Photo</button>
+            </div>
+            <div style="flex:1;min-width:260px">
+              <div class="form-row form-row-2">
+                <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="profileName"></div>
+                <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="profileEmail" type="email"></div>
+              </div>
+              <div class="form-group"><label class="form-label">Bio</label><textarea class="form-textarea" id="profileBio" rows="3" placeholder="Short bio shown on posts…"></textarea></div>
+              <div class="form-row form-row-2">
+                <div class="form-group"><label class="form-label">Twitter / X</label><input class="form-input" id="profileTwitter" placeholder="@handle"></div>
+                <div class="form-group"><label class="form-label">LinkedIn URL</label><input class="form-input" id="profileLinkedIn" placeholder="https://linkedin.com/in/…"></div>
+                <div class="form-group"><label class="form-label">Telegram</label><input class="form-input" id="profileTelegram" placeholder="@handle"></div>
+                <div class="form-group"><label class="form-label">Website</label><input class="form-input" id="profileWebsite" placeholder="https://…"></div>
+              </div>
+              <div style="display:flex;gap:.75rem;margin-top:.5rem">
+                <button class="btn btn-gold" onclick="saveProfile()"><i class="fas fa-save"></i> Save Profile</button>
+                <button class="btn btn-ghost" onclick="showChangePassModal()"><i class="fas fa-key"></i> Change Password</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </div><!-- /main-content -->
+
+</div><!-- /cms-layout -->
+</div><!-- /appShell -->
+
+<!-- ══════════════════════════════════════════════════════
+     POST / PAGE EDITOR MODAL
+══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="editorModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 id="editorModalTitle">New Post</h3>
+      <button class="modal-close" onclick="closeModal('editorModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" style="padding:0">
+      <div class="tabs" style="margin:0 1.5rem;padding-top:1rem">
+        <button class="tab-btn active" onclick="switchTab(this,'ed')">Content</button>
+        <button class="tab-btn" onclick="switchTab(this,'ed')">Media</button>
+        <button class="tab-btn" onclick="switchTab(this,'ed')">SEO</button>
+        <button class="tab-btn" onclick="switchTab(this,'ed')">Settings</button>
+      </div>
+      <div style="padding:0 1.5rem 1.5rem">
+
+        <!-- CONTENT TAB -->
+        <div class="tab-panel active" id="ed-0">
+          <div class="form-group">
+            <label class="form-label">Title *</label>
+            <input class="form-input" id="edTitle" placeholder="Post title…" oninput="autoSlug();updateSeoPreview();" style="font-size:1rem">
+          </div>
+          <div class="form-row form-row-2" id="edMetaRow">
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select class="form-select" id="edCategory" onchange="updateSeoPreview()"></select>
+            </div>
+            <div class="form-group" id="edAuthorGroup">
+              <label class="form-label">Author</label>
+              <select class="form-select" id="edAuthorSelect"></select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Excerpt</label>
+            <textarea class="form-textarea" id="edExcerpt" rows="2" placeholder="Short summary shown in listings…" oninput="updateSeoPreview()"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Content *</label>
+            <div class="rte-toolbar" id="rteToolbar">
+              <select class="rte-select" onchange="execCmd('formatBlock',this.value);this.value='p'">
+                <option value="p">Paragraph</option>
+                <option value="h2">Heading 2</option>
+                <option value="h3">Heading 3</option>
+                <option value="h4">Heading 4</option>
+              </select>
+              <div class="rte-sep"></div>
+              <button class="rte-btn" onclick="execCmd('bold')" title="Bold"><b>B</b></button>
+              <button class="rte-btn" onclick="execCmd('italic')" title="Italic"><i>I</i></button>
+              <button class="rte-btn" onclick="execCmd('underline')" title="Underline"><u>U</u></button>
+              <button class="rte-btn" onclick="execCmd('strikeThrough')" title="Strike"><s>S</s></button>
+              <div class="rte-sep"></div>
+              <button class="rte-btn" onclick="execCmd('insertUnorderedList')" title="Bullet list"><i class="fas fa-list-ul"></i></button>
+              <button class="rte-btn" onclick="execCmd('insertOrderedList')" title="Numbered list"><i class="fas fa-list-ol"></i></button>
+              <button class="rte-btn" onclick="execCmd('formatBlock','blockquote')" title="Quote"><i class="fas fa-quote-right"></i></button>
+              <div class="rte-sep"></div>
+              <button class="rte-btn" onclick="execCmd('justifyLeft')" title="Left"><i class="fas fa-align-left"></i></button>
+              <button class="rte-btn" onclick="execCmd('justifyCenter')" title="Center"><i class="fas fa-align-center"></i></button>
+              <button class="rte-btn" onclick="execCmd('justifyRight')" title="Right"><i class="fas fa-align-right"></i></button>
+              <div class="rte-sep"></div>
+              <button class="rte-btn" onclick="rteInsertLink()" title="Link"><i class="fas fa-link"></i></button>
+              <button class="rte-btn" onclick="rteInsertImage()" title="Inline image"><i class="fas fa-image"></i></button>
+              <button class="rte-btn" onclick="rteInsertCode()" title="Code block"><i class="fas fa-code"></i></button>
+              <div class="rte-sep"></div>
+              <button class="rte-btn" onclick="execCmd('undo')" title="Undo"><i class="fas fa-undo"></i></button>
+              <button class="rte-btn" onclick="execCmd('redo')" title="Redo"><i class="fas fa-redo"></i></button>
+              <button class="rte-btn" onclick="execCmd('removeFormat')" title="Clear format"><i class="fas fa-eraser"></i></button>
+            </div>
+            <div class="rte-body" id="rteBody" contenteditable="true" spellcheck="true"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tags</label>
+            <div class="tags-input-wrap" id="tagsWrap" onclick="document.getElementById('tagsInput').focus()">
+              <input class="tags-input-field" id="tagsInput" placeholder="Add tag…" onkeydown="handleTagInput(event)">
+            </div>
+            <div class="form-hint">Press Enter or comma to add a tag</div>
+          </div>
+        </div>
+
+        <!-- MEDIA TAB -->
+        <div class="tab-panel" id="ed-1">
+          <div class="form-row form-row-2">
+            <div>
+              <div class="form-group">
+                <label class="form-label">Featured Image</label>
+                <div class="img-preview-wrap" id="featuredImgWrap">
+                  <div class="img-placeholder" onclick="document.getElementById('featuredImgInput').click()">
+                    <i class="fas fa-image"></i><span>Click to add featured image</span>
+                  </div>
+                </div>
+                <input type="file" id="featuredImgInput" accept="image/*" style="display:none" onchange="previewFeaturedImg(this)">
+                <div class="form-group" style="margin-top:.75rem">
+                  <label class="form-label">Image ALT Text</label>
+                  <input class="form-input" id="featuredImgAlt" placeholder="Describe the image for accessibility &amp; SEO">
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="form-group">
+                <label class="form-label">Additional Images</label>
+                <div class="drop-zone" style="padding:1.25rem" onclick="document.getElementById('extraImgsInput').click()">
+                  <i class="fas fa-images"></i>
+                  <p style="font-size:.8rem">Upload additional images</p>
+                </div>
+                <input type="file" id="extraImgsInput" multiple accept="image/*" style="display:none" onchange="addExtraImages(this.files)">
+                <div id="extraImagesList" style="margin-top:.75rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:.5rem"></div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">File Attachments</label>
+            <div class="drop-zone" style="padding:1.25rem" onclick="document.getElementById('attachmentsInput').click()">
+              <i class="fas fa-paperclip"></i>
+              <p style="font-size:.8rem">Attach PDF, DOC, XLS, PPT, ZIP files</p>
+            </div>
+            <input type="file" id="attachmentsInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip" style="display:none" onchange="addAttachments(this.files)">
+            <div class="attachment-list" id="attachmentList" style="margin-top:.75rem"></div>
+          </div>
+        </div>
+
+        <!-- SEO TAB -->
+        <div class="tab-panel" id="ed-2">
+          <div class="seo-preview" id="seoPreviewBox">
+            <div class="seo-preview-url" id="seoPreviewUrl">https://web3legals.com/blog/</div>
+            <div class="seo-preview-title" id="seoPreviewTitle">Post title — Web3Legals</div>
+            <div class="seo-preview-desc" id="seoPreviewDesc">Meta description will appear here…</div>
+          </div>
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label class="form-label">SEO Title <span id="seoTitleCount" class="char-count" style="float:right"></span></label>
+              <input class="form-input" id="edSeoTitle" placeholder="SEO title (50–60 chars recommended)" oninput="updateSeoPreview()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">URL Slug</label>
+              <div class="input-with-btn">
+                <input class="form-input" id="edSlug" placeholder="url-friendly-slug">
+                <button class="btn btn-ghost btn-sm" onclick="autoSlug()"><i class="fas fa-magic"></i></button>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Meta Description <span id="seoDescCount" class="char-count" style="float:right"></span></label>
+            <textarea class="form-textarea" id="edMetaDesc" rows="3" placeholder="Meta description (120–158 chars recommended)" oninput="updateSeoPreview()"></textarea>
+          </div>
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label class="form-label">Focus Keyword</label>
+              <input class="form-input" id="edFocusKw" placeholder="Primary keyword">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Canonical URL</label>
+              <input class="form-input" id="edCanonical" placeholder="https://web3legals.com/…">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Robots Meta</label>
+              <select class="form-select" id="edRobots">
+                <option value="index,follow">Index, Follow (default)</option>
+                <option value="noindex,follow">NoIndex, Follow</option>
+                <option value="index,nofollow">Index, NoFollow</option>
+                <option value="noindex,nofollow">NoIndex, NoFollow</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Schema Type</label>
+              <select class="form-select" id="edSchemaType">
+                <option value="Article">Article</option>
+                <option value="BlogPosting">Blog Posting</option>
+                <option value="NewsArticle">News Article</option>
+                <option value="LegalService">Legal Service</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Collapsible Open Graph -->
+          <div class="collapsible-header" onclick="toggleCollapsible(this)">
+            <h4><i class="fab fa-facebook" style="color:#1877f2"></i> Open Graph (Facebook)</h4>
+            <i class="fas fa-chevron-down collapsible-arrow"></i>
+          </div>
+          <div class="collapsible-body">
+            <div class="form-row form-row-2">
+              <div class="form-group"><label class="form-label">OG Title</label><input class="form-input" id="edOgTitle" placeholder="Defaults to SEO title"></div>
+              <div class="form-group"><label class="form-label">OG Image URL</label><input class="form-input" id="edOgImage" placeholder="https://…"></div>
+              <div class="form-group" style="grid-column:1/-1"><label class="form-label">OG Description</label><textarea class="form-textarea" id="edOgDesc" rows="2" placeholder="Defaults to meta description"></textarea></div>
+            </div>
+          </div>
+
+          <!-- Collapsible Twitter -->
+          <div class="collapsible-header" onclick="toggleCollapsible(this)">
+            <h4><i class="fab fa-x-twitter"></i> Twitter / X Card</h4>
+            <i class="fas fa-chevron-down collapsible-arrow"></i>
+          </div>
+          <div class="collapsible-body">
+            <div class="form-row form-row-2">
+              <div class="form-group"><label class="form-label">Card Type</label><select class="form-select" id="edTwitterCard"><option value="summary_large_image">Summary Large Image</option><option value="summary">Summary</option></select></div>
+              <div class="form-group"><label class="form-label">Twitter Image URL</label><input class="form-input" id="edTwitterImg" placeholder="https://…"></div>
+              <div class="form-group"><label class="form-label">Twitter Title</label><input class="form-input" id="edTwitterTitle" placeholder="Defaults to SEO title"></div>
+              <div class="form-group"><label class="form-label">Twitter Description</label><input class="form-input" id="edTwitterDesc" placeholder="Defaults to meta description"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SETTINGS TAB -->
+        <div class="tab-panel" id="ed-3">
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select class="form-select" id="edStatus">
+                <option>Draft</option><option>Published</option><option>Scheduled</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Publish / Schedule Date</label>
+              <input class="form-input" type="datetime-local" id="edPublishDate">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Reading Time</label>
+              <input class="form-input" id="edReadTime" placeholder="Auto-calculated" readonly>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last Updated</label>
+              <input class="form-input" id="edUpdated" placeholder="Auto" readonly>
+            </div>
+          </div>
+          <div class="form-group" id="edEmojiGroup">
+            <label class="form-label">Post Emoji / Icon</label>
+            <input class="form-input" id="edEmoji" placeholder="📝" maxlength="4" style="width:80px;text-align:center;font-size:1.4rem">
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('editorModal')">Cancel</button>
+      <button class="btn btn-outline" onclick="previewPost()"><i class="fas fa-eye"></i> Preview</button>
+      <button class="btn btn-gold" onclick="savePost()"><i class="fas fa-save"></i> Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     AUTHOR MODAL
+══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="authorModal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 id="authorModalTitle">Add Author</h3>
+      <button class="modal-close" onclick="closeModal('authorModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="text-align:center;margin-bottom:1.25rem">
+        <div id="authorPhotoPreview" style="width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dark),var(--gold));display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto .75rem;overflow:hidden;border:2px solid var(--gold)"></div>
+        <input type="file" id="authorPhotoInput" accept="image/*" style="display:none" onchange="previewAuthorPhoto(this)">
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('authorPhotoInput').click()"><i class="fas fa-camera"></i> Photo</button>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group"><label class="form-label">Name *</label><input class="form-input" id="authorName"></div>
+        <div class="form-group"><label class="form-label">Email *</label><input class="form-input" id="authorEmail" type="email"></div>
+        <div class="form-group"><label class="form-label">Password *</label><input class="form-input" id="authorPassword" type="password" placeholder="Min 8 characters"></div>
+        <div class="form-group"><label class="form-label">Role</label><select class="form-select" id="authorRole"><option value="author">Author</option><option value="admin">Admin</option></select></div>
+      </div>
+      <div class="form-group"><label class="form-label">Bio</label><textarea class="form-textarea" id="authorBio" rows="2" placeholder="Short bio…"></textarea></div>
+      <div class="form-row form-row-2">
+        <div class="form-group"><label class="form-label">Twitter</label><input class="form-input" id="authorTwitter" placeholder="@handle"></div>
+        <div class="form-group"><label class="form-label">LinkedIn</label><input class="form-input" id="authorLinkedIn" placeholder="URL"></div>
+        <div class="form-group"><label class="form-label">Telegram</label><input class="form-input" id="authorTelegram" placeholder="@handle"></div>
+        <div class="form-group"><label class="form-label">Website</label><input class="form-input" id="authorWebsite" placeholder="https://…"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('authorModal')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveAuthor()"><i class="fas fa-save"></i> Save Author</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     CHANGE PASSWORD MODAL (for authors)
+══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="changePassModal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>Change Password</h3>
+      <button class="modal-close" onclick="closeModal('changePassModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Current Password</label><input class="form-input" type="password" id="cpCurrent"></div>
+      <div class="form-group"><label class="form-label">New Password</label><input class="form-input" type="password" id="cpNew"></div>
+      <div class="form-group"><label class="form-label">Confirm New Password</label><input class="form-input" type="password" id="cpConfirm"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('changePassModal')">Cancel</button>
+      <button class="btn btn-gold" onclick="savePasswordFromModal()"><i class="fas fa-key"></i> Update Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MEDIA PREVIEW MODAL
+══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="mediaPreviewModal">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-header">
+      <h3 id="mediaPreviewTitle">File Preview</h3>
+      <button class="modal-close" onclick="closeModal('mediaPreviewModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="mediaPreviewBody" style="min-height:300px;display:flex;align-items:center;justify-content:center"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="copyMediaUrl()"><i class="fas fa-copy"></i> Copy URL</button>
+      <button class="btn btn-danger" id="mediaDeleteBtn"><i class="fas fa-trash"></i> Delete</button>
+      <button class="btn btn-gold" onclick="closeModal('mediaPreviewModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PREVIEW MODAL
+══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="previewModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3>Post Preview</h3>
+      <button class="modal-close" onclick="closeModal('previewModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="previewContent" style="font-size:.9rem;line-height:1.75;color:var(--white-muted)"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toastEl"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ─── CONSTANTS ──────────────────────────────────────── */
+const STORAGE = {
+  users: 'w3l_users',
+  posts: 'w3l_posts',
+  pages: 'w3l_pages',
+  media: 'w3l_media',
+  settings: 'w3l_settings',
+  secrets: 'w3l_secrets',
+  session: 'w3l_session'
+};
+
+const DEFAULT_CATEGORIES = ['MiCA','UAE','Singapore','DeFi','DAO Law','NFT','AML','Tax Law','Token Law','Compliance','Research','General'];
+
+/* ─── DATA HELPERS ───────────────────────────────────── */
+function load(key) {
+  try { return JSON.parse(localStorage.getItem(key)) || null; } catch(e) { return null; }
+}
+function save(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) { showToast('Storage error', 'error'); }
+}
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+function fmtDate(d) {
+  if (!d) return '';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+}
+function fmtDatetime(d) {
+  if (!d) return '';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+function readTime(html) {
+  const words = (html || '').replace(/<[^>]+>/g,'').split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / 200)) + ' min read';
+}
+function slugify(s) {
+  return s.toLowerCase().replace(/[^\w\s-]/g,'').replace(/[\s_]+/g,'-').replace(/^-+|-+$/g,'');
+}
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+function fileTypeIcon(name) {
+  const ext = (name || '').split('.').pop().toLowerCase();
+  const map = { pdf:'📄', doc:'📝', docx:'📝', xls:'📊', xlsx:'📊', ppt:'📋', pptx:'📋', zip:'🗜️', png:'🖼️', jpg:'🖼️', jpeg:'🖼️', gif:'🖼️', webp:'🖼️', svg:'🖼️' };
+  return map[ext] || '📁';
+}
+function fileType(name) {
+  const ext = (name || '').split('.').pop().toLowerCase();
+  if (['png','jpg','jpeg','gif','webp','svg'].includes(ext)) return 'image';
+  if (ext === 'pdf') return 'pdf';
+  if (['doc','docx'].includes(ext)) return 'doc';
+  if (['xls','xlsx'].includes(ext)) return 'excel';
+  if (['ppt','pptx'].includes(ext)) return 'ppt';
+  if (ext === 'zip') return 'zip';
+  return 'other';
+}
+function fmtSize(bytes) {
+  if (!bytes) return '';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/1048576).toFixed(1) + ' MB';
+}
+
+/* ─── TOAST ──────────────────────────────────────────── */
+function showToast(msg, type='success') {
+  const t = document.getElementById('toastEl');
+  t.textContent = msg;
+  t.className = 'toast ' + type;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+/* ─── AUTH / SESSION ─────────────────────────────────── */
+let currentUser = null;
+
+function initUsers() {
+  let users = load(STORAGE.users);
+  if (!users) {
+    const settings = load(STORAGE.settings) || {};
+    users = [{
+      id: 'admin',
+      name: 'Rahul Pareek',
+      email: 'admin@web3legals.com',
+      password: settings.adminPass || 'R9252784858r@',
+      role: 'admin',
+      bio: 'Founding partner and crypto legal expert.',
+      photo: '',
+      twitter: '@Parikrahul',
+      linkedin: 'https://rahulpareek.in',
+      telegram: '@Parikrahul',
+      website: 'https://rahulpareek.in',
+      active: true
+    }];
+    save(STORAGE.users, users);
+  }
+  return users;
+}
+
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('loginPass').value;
+  const users = initUsers();
+  const user = users.find(u => u.email.toLowerCase() === email && u.password === pass && u.active !== false);
+  if (!user) {
+    const errEl = document.getElementById('loginError');
+    errEl.textContent = 'Invalid email or password.';
+    errEl.style.display = 'block';
+    return;
+  }
+  save(STORAGE.session, { id: user.id, ts: Date.now() });
+  currentUser = user;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appShell').style.display = 'block';
+  initApp();
+}
+
+function doLogout() {
+  localStorage.removeItem(STORAGE.session);
+  currentUser = null;
+  document.getElementById('appShell').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginError').style.display = 'none';
+}
+
+function checkSession() {
+  const sess = load(STORAGE.session);
+  if (!sess) return false;
+  const users = initUsers();
+  const user = users.find(u => u.id === sess.id && u.active !== false);
+  if (!user) return false;
+  currentUser = user;
+  return true;
+}
+
+function isAdmin() { return currentUser && currentUser.role === 'admin'; }
+
+/* ─── APP INIT ───────────────────────────────────────── */
+function initApp() {
+  renderSidebar();
+  renderUserBadge();
+  setTopbarDate();
+  showPanel('dashboard');
+}
+
+function setTopbarDate() {
+  const el = document.getElementById('topbarDate');
+  if (el) el.textContent = new Date().toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+}
+
+function renderUserBadge() {
+  const nameEl = document.getElementById('sidebarName');
+  const roleEl = document.getElementById('sidebarRole');
+  const avatarEl = document.getElementById('sidebarAvatar');
+  if (!currentUser) return;
+  nameEl.textContent = currentUser.name;
+  roleEl.textContent = currentUser.role;
+  if (currentUser.photo) {
+    avatarEl.innerHTML = `<img src="${currentUser.photo}" alt="${escHtml(currentUser.name)}">`;
+  } else {
+    avatarEl.textContent = currentUser.name.charAt(0).toUpperCase();
+  }
+}
+
+/* ─── SIDEBAR ────────────────────────────────────────── */
+const NAV_ITEMS = [
+  { section: 'Main' },
+  { id: 'dashboard', label: 'Dashboard', icon: 'fa-tachometer-alt' },
+  { section: 'Content' },
+  { id: 'posts', label: 'Blog Posts', icon: 'fa-file-alt' },
+  { id: 'pages', label: 'Pages', icon: 'fa-copy' },
+  { id: 'media', label: 'Media Library', icon: 'fa-images' },
+  { section: 'Admin', adminOnly: true },
+  { id: 'authors', label: 'Authors', icon: 'fa-users', adminOnly: true },
+  { id: 'settings', label: 'Settings', icon: 'fa-cog', adminOnly: true },
+  { section: 'Account' },
+  { id: 'profile', label: 'My Profile', icon: 'fa-user' },
+];
+
+function renderSidebar() {
+  const nav = document.getElementById('sidebarNav');
+  nav.innerHTML = '';
+  NAV_ITEMS.forEach(item => {
+    if (item.section) {
+      if (item.adminOnly && !isAdmin()) return;
+      const el = document.createElement('div');
+      el.className = 'nav-section-label';
+      el.textContent = item.section;
+      nav.appendChild(el);
+      return;
+    }
+    if (item.adminOnly && !isAdmin()) return;
+    const el = document.createElement('div');
+    el.className = 'nav-item';
+    el.dataset.panel = item.id;
+    el.innerHTML = `<i class="fas ${item.icon}"></i><span>${item.label}</span>`;
+    el.onclick = () => showPanel(item.id);
+    nav.appendChild(el);
+  });
+}
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const panel = document.getElementById('panel-' + id);
+  if (panel) panel.classList.add('active');
+  const nav = document.querySelector(`.nav-item[data-panel="${id}"]`);
+  if (nav) nav.classList.add('active');
+  const titles = { dashboard:'Dashboard', posts:'Blog Posts', pages:'Pages', media:'Media Library', authors:'Authors & Users', settings:'Settings', profile:'My Profile' };
+  document.getElementById('topbarTitle').textContent = titles[id] || id;
+  // Render relevant panel
+  const renderers = { dashboard: renderDashboard, posts: renderPosts, pages: renderPages, media: renderMedia, authors: renderAuthors, profile: renderProfile, settings: renderSettingsPanel };
+  if (renderers[id]) renderers[id]();
+  closeSidebarMobile();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+function closeSidebarMobile() {
+  if (window.innerWidth <= 900) document.getElementById('sidebar').classList.remove('open');
+}
+
+/* ─── MODAL HELPERS ──────────────────────────────────── */
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+/* ─── TAB SWITCH ─────────────────────────────────────── */
+function switchTab(btn, prefix) {
+  const container = btn.closest('.tabs').parentElement;
+  const btns = btn.closest('.tabs').querySelectorAll('.tab-btn');
+  const panels = container.querySelectorAll('.tab-panel');
+  btns.forEach((b, i) => {
+    b.classList.toggle('active', b === btn);
+    if (panels[i]) panels[i].classList.toggle('active', b === btn);
+  });
+}
+
+/* ─── COLLAPSIBLE ────────────────────────────────────── */
+function toggleCollapsible(header) {
+  header.classList.toggle('open');
+  const body = header.nextElementSibling;
+  if (body) body.classList.toggle('open');
+}
+
+/* ─── DASHBOARD ──────────────────────────────────────── */
+function renderDashboard() {
+  const posts = load(STORAGE.posts) || [];
+  const pages = load(STORAGE.pages) || [];
+  const media = load(STORAGE.media) || [];
+  const users = initUsers();
+  const myPosts = isAdmin() ? posts : posts.filter(p => p.authorId === currentUser.id);
+
+  document.getElementById('dashStats').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${myPosts.length}</div><div class="stat-label">Total Posts</div></div>
+    <div class="stat-card"><div class="stat-num">${myPosts.filter(p=>p.status==='Published').length}</div><div class="stat-label">Published</div></div>
+    <div class="stat-card"><div class="stat-num">${myPosts.filter(p=>p.status==='Draft').length}</div><div class="stat-label">Drafts</div></div>
+    <div class="stat-card"><div class="stat-num">${pages.length}</div><div class="stat-label">Pages</div></div>
+    ${isAdmin() ? `<div class="stat-card"><div class="stat-num">${media.length}</div><div class="stat-label">Media Files</div></div><div class="stat-card"><div class="stat-num">${users.length}</div><div class="stat-label">Users</div></div>` : ''}
+  `;
+
+  const recentPosts = myPosts.slice(-5).reverse();
+  document.getElementById('dashRecentPosts').innerHTML = recentPosts.length
+    ? recentPosts.map(p => `<div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--black-border)"><div><div style="font-size:.82rem;color:var(--white);font-weight:500">${escHtml(p.title)}</div><div style="font-size:.7rem;color:var(--white-muted)">${fmtDate(p.date)}</div></div><span class="badge ${statusBadgeClass(p.status)}">${p.status||'Draft'}</span></div>`).join('')
+    : '<div class="empty-state" style="padding:1.5rem"><i class="fas fa-file-alt"></i><p>No posts yet</p></div>';
+
+  const adminActions = isAdmin() ? `<button class="btn btn-ghost" onclick="showPanel('authors')"><i class="fas fa-users"></i> Manage Authors</button><button class="btn btn-ghost" onclick="showPanel('settings')"><i class="fas fa-cog"></i> Settings</button>` : '';
+  document.getElementById('dashQuickActions').innerHTML = `
+    <button class="btn btn-gold" onclick="openPostEditor()"><i class="fas fa-plus"></i> New Blog Post</button>
+    <button class="btn btn-outline" onclick="openPageEditor()"><i class="fas fa-plus"></i> New Page</button>
+    <button class="btn btn-ghost" onclick="showPanel('media')"><i class="fas fa-images"></i> Media Library</button>
+    ${adminActions}
+  `;
+}
+
+function statusBadgeClass(s) {
+  const m = { Published:'badge-green', Draft:'badge-gray', Scheduled:'badge-blue' };
+  return m[s] || 'badge-gray';
+}
+
+/* ─── POSTS ──────────────────────────────────────────── */
+let editingPost = null;
+let editingPage = null;   // defined here; also referenced below in Pages section
+let editorMode = 'post';  // 'post' | 'page'
+let postTags = [];
+let attachments = [];
+let extraImages = [];
+
+function getPosts() {
+  const posts = load(STORAGE.posts) || getDefaultPosts();
+  return isAdmin() ? posts : posts.filter(p => p.authorId === currentUser.id || !p.authorId);
+}
+function getDefaultPosts() {
+  return [
+    { id:uid(), slug:'mica-regulation-guide', emoji:'🇪🇺', category:'MiCA', date:new Date().toISOString(), title:'MiCA 2024: Complete Guide for Crypto Businesses Entering the EU', excerpt:'Everything you need to know about Markets in Crypto-Assets Regulation.', content:'<p>MiCA brings a unified regulatory framework for crypto assets across the EU...</p>', status:'Published', readTime:'8 min read', authorId:'admin', tags:['MiCA','EU','Regulation'], seo:{} },
+    { id:uid(), slug:'uae-vara-crypto-license', emoji:'🇦🇪', category:'UAE', date:new Date().toISOString(), title:'UAE VARA Crypto License: Step-by-Step Application Guide', excerpt:'How to obtain a Virtual Asset Regulatory Authority license in Dubai.', content:'<p>The UAE VARA framework provides a clear pathway for crypto businesses...</p>', status:'Published', readTime:'6 min read', authorId:'admin', tags:['UAE','VARA','Licensing'], seo:{} },
+    { id:uid(), slug:'dao-legal-wrapper', emoji:'⚖️', category:'DAO Law', date:new Date().toISOString(), title:'How to Give Your DAO a Legal Wrapper Without Killing Decentralisation', excerpt:'Practical frameworks for wrapping DAOs with legal entities.', content:'<p>DAO legal wrappers protect contributors while preserving decentralisation...</p>', status:'Draft', readTime:'7 min read', authorId:'admin', tags:['DAO','Legal','Structure'], seo:{} }
+  ];
+}
+
+function renderPosts() {
+  const posts = getPosts();
+  const search = document.getElementById('postsSearch')?.value.toLowerCase() || '';
+  const statusFilter = document.getElementById('postsFilterStatus')?.value || '';
+  const catFilter = document.getElementById('postsFilterCat')?.value || '';
+
+  // Populate category filter
+  const catSel = document.getElementById('postsFilterCat');
+  const cats = [...new Set(posts.map(p => p.category).filter(Boolean))];
+  if (catSel && catSel.options.length <= 1) {
+    cats.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; catSel.appendChild(o); });
+  }
+
+  const filtered = posts.filter(p => {
+    const matchSearch = !search || p.title.toLowerCase().includes(search) || (p.excerpt||'').toLowerCase().includes(search);
+    const matchStatus = !statusFilter || p.status === statusFilter;
+    const matchCat = !catFilter || p.category === catFilter;
+    return matchSearch && matchStatus && matchCat;
+  });
+
+  const tbody = document.getElementById('postsTableBody');
+  const empty = document.getElementById('postsEmpty');
+  const users = initUsers();
+
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = filtered.map(p => {
+    const author = users.find(u => u.id === p.authorId);
+    return `<tr>
+      <td><div style="font-weight:500;color:var(--white);font-size:.85rem">${p.emoji||'📝'} ${escHtml(p.title)}</div><div style="font-size:.72rem;color:var(--white-muted);margin-top:.15rem">${p.readTime||''}</div></td>
+      <td>${author ? escHtml(author.name) : '—'}</td>
+      <td>${p.category ? `<span class="badge badge-gold">${escHtml(p.category)}</span>` : '—'}</td>
+      <td><span class="badge ${statusBadgeClass(p.status)}">${p.status||'Draft'}</span></td>
+      <td style="white-space:nowrap">${fmtDate(p.date)}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-sm btn-ghost btn-icon" onclick='editPost("${p.id}")' title="Edit"><i class="fas fa-edit"></i></button>
+        <button class="btn btn-sm btn-ghost btn-icon" onclick='duplicatePost("${p.id}")' title="Duplicate"><i class="fas fa-copy"></i></button>
+        <button class="btn btn-sm btn-danger btn-icon" onclick='deletePost("${p.id}")' title="Delete"><i class="fas fa-trash"></i></button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function openPostEditor(postId) {
+  resetEditor();
+  editingPost = null;
+  editingPage = null;
+  editorMode = 'post';
+  postTags = [];
+  attachments = [];
+  extraImages = [];
+  document.getElementById('editorModalTitle').textContent = 'New Post';
+  document.getElementById('edEmojiGroup').style.display = 'block';
+
+  // Populate category dropdown
+  const catSel = document.getElementById('edCategory');
+  catSel.innerHTML = DEFAULT_CATEGORIES.map(c => `<option>${c}</option>`).join('');
+
+  // Populate author dropdown (admin only)
+  const authorGroup = document.getElementById('edAuthorGroup');
+  if (isAdmin()) {
+    authorGroup.style.display = 'block';
+    const authorSel = document.getElementById('edAuthorSelect');
+    const users = initUsers();
+    authorSel.innerHTML = users.map(u => `<option value="${u.id}">${escHtml(u.name)} (${u.role})</option>`).join('');
+    authorSel.value = currentUser.id;
+  } else {
+    authorGroup.style.display = 'none';
+  }
+
+  document.getElementById('edPublishDate').value = new Date().toISOString().slice(0,16);
+  document.getElementById('edUpdated').value = fmtDatetime(new Date());
+  renderTagsUI();
+  updateSeoPreview();
+  openModal('editorModal');
+  switchToFirstTab('ed');
+}
+
+function editPost(id) {
+  const posts = load(STORAGE.posts) || getDefaultPosts();
+  const post = posts.find(p => p.id === id);
+  if (!post) return;
+  editingPost = id;
+  editingPage = null;
+  editorMode = 'post';
+  postTags = post.tags || [];
+  attachments = post.attachments || [];
+  extraImages = post.extraImages || [];
+
+  // Populate category dropdown
+  const catSel = document.getElementById('edCategory');
+  catSel.innerHTML = DEFAULT_CATEGORIES.map(c => `<option>${c}</option>`).join('');
+
+  // Author group
+  const authorGroup = document.getElementById('edAuthorGroup');
+  if (isAdmin()) {
+    authorGroup.style.display = 'block';
+    const authorSel = document.getElementById('edAuthorSelect');
+    const users = initUsers();
+    authorSel.innerHTML = users.map(u => `<option value="${u.id}">${escHtml(u.name)} (${u.role})</option>`).join('');
+    authorSel.value = post.authorId || currentUser.id;
+  } else {
+    authorGroup.style.display = 'none';
+  }
+
+  document.getElementById('edTitle').value = post.title || '';
+  document.getElementById('edCategory').value = post.category || '';
+  document.getElementById('edExcerpt').value = post.excerpt || '';
+  document.getElementById('rteBody').innerHTML = post.content || '';
+  document.getElementById('edStatus').value = post.status || 'Draft';
+  document.getElementById('edPublishDate').value = post.publishDate ? post.publishDate.slice(0,16) : new Date().toISOString().slice(0,16);
+  document.getElementById('edEmoji').value = post.emoji || '📝';
+  document.getElementById('edReadTime').value = post.readTime || '';
+  document.getElementById('edUpdated').value = fmtDatetime(new Date());
+  // SEO
+  const seo = post.seo || {};
+  document.getElementById('edSeoTitle').value = seo.title || '';
+  document.getElementById('edSlug').value = post.slug || '';
+  document.getElementById('edMetaDesc').value = seo.metaDesc || '';
+  document.getElementById('edFocusKw').value = seo.focusKw || '';
+  document.getElementById('edCanonical').value = seo.canonical || '';
+  document.getElementById('edRobots').value = seo.robots || 'index,follow';
+  document.getElementById('edSchemaType').value = seo.schemaType || 'Article';
+  document.getElementById('edOgTitle').value = seo.ogTitle || '';
+  document.getElementById('edOgImage').value = seo.ogImage || '';
+  document.getElementById('edOgDesc').value = seo.ogDesc || '';
+  document.getElementById('edTwitterCard').value = seo.twitterCard || 'summary_large_image';
+  document.getElementById('edTwitterImg').value = seo.twitterImg || '';
+  document.getElementById('edTwitterTitle').value = seo.twitterTitle || '';
+  document.getElementById('edTwitterDesc').value = seo.twitterDesc || '';
+  // Featured image
+  if (post.featuredImg) {
+    const wrap = document.getElementById('featuredImgWrap');
+    wrap.innerHTML = `<img src="${post.featuredImg}" alt=""><button class="img-preview-remove" onclick="removeFeaturedImg()"><i class="fas fa-times"></i></button>`;
+  }
+  document.getElementById('featuredImgAlt').value = post.featuredImgAlt || '';
+  // Extra images
+  renderExtraImages();
+  // Attachments
+  renderAttachments();
+  renderTagsUI();
+  updateSeoPreview();
+  document.getElementById('editorModalTitle').textContent = 'Edit Post';
+  document.getElementById('edEmojiGroup').style.display = 'block';
+  openModal('editorModal');
+  switchToFirstTab('ed');
+}
+
+
+function deletePost(id) {
+  if (!confirm('Delete this post? This cannot be undone.')) return;
+  let posts = load(STORAGE.posts) || getDefaultPosts();
+  posts = posts.filter(p => p.id !== id);
+  save(STORAGE.posts, posts);
+  renderPosts();
+  showToast('Post deleted');
+}
+
+function duplicatePost(id) {
+  let posts = load(STORAGE.posts) || getDefaultPosts();
+  const post = posts.find(p => p.id === id);
+  if (!post) return;
+  const copy = { ...post, id: uid(), title: post.title + ' (Copy)', status: 'Draft', slug: post.slug + '-copy', date: new Date().toISOString() };
+  posts.push(copy);
+  save(STORAGE.posts, posts);
+  renderPosts();
+  showToast('Post duplicated');
+}
+
+function previewPost() {
+  const title = document.getElementById('edTitle').value || 'Untitled';
+  const content = document.getElementById('rteBody').innerHTML;
+  const excerpt = document.getElementById('edExcerpt').value;
+  document.getElementById('previewContent').innerHTML = `
+    <h1 style="font-size:1.6rem;margin-bottom:.75rem">${escHtml(title)}</h1>
+    ${excerpt ? `<p style="font-style:italic;border-left:3px solid var(--gold);padding-left:1rem;margin-bottom:1.25rem">${escHtml(excerpt)}</p>` : ''}
+    <div class="rte-body" style="border:none;padding:0;min-height:auto;background:none">${content}</div>
+  `;
+  openModal('previewModal');
+}
+
+function resetEditor() {
+  editingPost = null;
+  editingPage = null;
+  editorMode = 'post';
+  document.getElementById('edTitle').value = '';
+  document.getElementById('edExcerpt').value = '';
+  document.getElementById('rteBody').innerHTML = '';
+  document.getElementById('edStatus').value = 'Draft';
+  document.getElementById('edEmoji').value = '📝';
+  document.getElementById('edSeoTitle').value = '';
+  document.getElementById('edSlug').value = '';
+  document.getElementById('edMetaDesc').value = '';
+  document.getElementById('edFocusKw').value = '';
+  document.getElementById('edCanonical').value = '';
+  document.getElementById('edRobots').value = 'index,follow';
+  document.getElementById('edSchemaType').value = 'Article';
+  document.getElementById('edOgTitle').value = '';
+  document.getElementById('edOgImage').value = '';
+  document.getElementById('edOgDesc').value = '';
+  document.getElementById('edTwitterCard').value = 'summary_large_image';
+  document.getElementById('edTwitterImg').value = '';
+  document.getElementById('edTwitterTitle').value = '';
+  document.getElementById('edTwitterDesc').value = '';
+  document.getElementById('featuredImgWrap').innerHTML = `<div class="img-placeholder" onclick="document.getElementById('featuredImgInput').click()"><i class="fas fa-image"></i><span>Click to add featured image</span></div>`;
+  document.getElementById('featuredImgAlt').value = '';
+  document.getElementById('extraImagesList').innerHTML = '';
+  document.getElementById('attachmentList').innerHTML = '';
+  document.getElementById('edReadTime').value = '';
+  document.getElementById('edUpdated').value = '';
+  postTags = [];
+  attachments = [];
+  extraImages = [];
+}
+
+function switchToFirstTab(prefix) {
+  const container = document.getElementById('editorModal').querySelector('.tabs');
+  if (container) {
+    const btns = container.querySelectorAll('.tab-btn');
+    if (btns[0]) switchTab(btns[0], prefix);
+  }
+}
+
+/* ─── PAGES ──────────────────────────────────────────── */
+
+function renderPages() {
+  const pages = load(STORAGE.pages) || [];
+  const myPages = isAdmin() ? pages : pages.filter(p => p.authorId === currentUser.id);
+  const tbody = document.getElementById('pagesTableBody');
+  const empty = document.getElementById('pagesEmpty');
+  if (!myPages.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = myPages.map(p => `<tr>
+    <td style="font-weight:500;color:var(--white)">${escHtml(p.title)}</td>
+    <td><code style="font-size:.75rem;color:var(--white-muted)">${escHtml(p.slug||'')}</code></td>
+    <td><span class="badge ${p.status==='Published'?'badge-green':'badge-gray'}">${p.status||'Draft'}</span></td>
+    <td>${fmtDate(p.updatedAt||p.date)}</td>
+    <td><div class="td-actions">
+      <button class="btn btn-sm btn-ghost btn-icon" onclick='editPage("${p.id}")' title="Edit"><i class="fas fa-edit"></i></button>
+      <button class="btn btn-sm btn-danger btn-icon" onclick='deletePage("${p.id}")' title="Delete"><i class="fas fa-trash"></i></button>
+    </div></td>
+  </tr>`).join('');
+}
+
+function openPageEditor() {
+  resetEditor();
+  editingPage = null;
+  editingPost = null;
+  editorMode = 'page';
+  postTags = [];
+  attachments = [];
+  extraImages = [];
+  document.getElementById('editorModalTitle').textContent = 'New Page';
+  document.getElementById('edEmojiGroup').style.display = 'none';
+  document.getElementById('edAuthorGroup').style.display = 'none';
+
+  const catSel = document.getElementById('edCategory');
+  catSel.innerHTML = '<option value="page">Page</option>';
+
+  document.getElementById('edPublishDate').value = new Date().toISOString().slice(0,16);
+  document.getElementById('edUpdated').value = fmtDatetime(new Date());
+  renderTagsUI();
+  updateSeoPreview();
+  openModal('editorModal');
+  switchToFirstTab('ed');
+}
+
+function editPage(id) {
+  const pages = load(STORAGE.pages) || [];
+  const page = pages.find(p => p.id === id);
+  if (!page) return;
+  editingPage = id;
+  editingPost = null;
+  editorMode = 'page';
+  postTags = page.tags || [];
+  attachments = page.attachments || [];
+  extraImages = page.extraImages || [];
+
+  document.getElementById('editorModalTitle').textContent = 'Edit Page';
+  document.getElementById('edEmojiGroup').style.display = 'none';
+  document.getElementById('edAuthorGroup').style.display = 'none';
+
+  const catSel = document.getElementById('edCategory');
+  catSel.innerHTML = '<option value="page">Page</option>';
+
+  document.getElementById('edTitle').value = page.title || '';
+  document.getElementById('edExcerpt').value = page.excerpt || '';
+  document.getElementById('rteBody').innerHTML = page.content || '';
+  document.getElementById('edStatus').value = page.status || 'Draft';
+  document.getElementById('edSlug').value = page.slug || '';
+  document.getElementById('edUpdated').value = fmtDatetime(new Date());
+
+  const seo = page.seo || {};
+  document.getElementById('edSeoTitle').value = seo.title || '';
+  document.getElementById('edMetaDesc').value = seo.metaDesc || '';
+  document.getElementById('edFocusKw').value = seo.focusKw || '';
+  document.getElementById('edCanonical').value = seo.canonical || '';
+  document.getElementById('edRobots').value = seo.robots || 'index,follow';
+  document.getElementById('edOgTitle').value = seo.ogTitle || '';
+  document.getElementById('edOgImage').value = seo.ogImage || '';
+
+  if (page.featuredImg) {
+    document.getElementById('featuredImgWrap').innerHTML = `<img src="${page.featuredImg}" alt=""><button class="img-preview-remove" onclick="removeFeaturedImg()"><i class="fas fa-times"></i></button>`;
+  }
+  document.getElementById('featuredImgAlt').value = page.featuredImgAlt || '';
+  renderExtraImages();
+  renderAttachments();
+  renderTagsUI();
+  updateSeoPreview();
+  openModal('editorModal');
+  switchToFirstTab('ed');
+}
+
+function savePost() {
+  // Handles both posts and pages depending on editingPage
+  const title = document.getElementById('edTitle').value.trim();
+  if (!title) { showToast('Title is required', 'error'); return; }
+
+  const isPage = editorMode === 'page';
+
+  const content = document.getElementById('rteBody').innerHTML;
+  const status = document.getElementById('edStatus').value;
+  const seo = {
+    title: document.getElementById('edSeoTitle').value,
+    metaDesc: document.getElementById('edMetaDesc').value,
+    focusKw: document.getElementById('edFocusKw').value,
+    canonical: document.getElementById('edCanonical').value,
+    robots: document.getElementById('edRobots').value,
+    schemaType: document.getElementById('edSchemaType').value,
+    ogTitle: document.getElementById('edOgTitle').value,
+    ogImage: document.getElementById('edOgImage').value,
+    ogDesc: document.getElementById('edOgDesc').value,
+    twitterCard: document.getElementById('edTwitterCard').value,
+    twitterImg: document.getElementById('edTwitterImg').value,
+    twitterTitle: document.getElementById('edTwitterTitle').value,
+    twitterDesc: document.getElementById('edTwitterDesc').value,
+  };
+  const featuredImgEl = document.querySelector('#featuredImgWrap img');
+  const data = {
+    title,
+    slug: document.getElementById('edSlug').value || slugify(title),
+    excerpt: document.getElementById('edExcerpt').value,
+    content, status, tags: postTags, attachments, extraImages,
+    featuredImg: featuredImgEl ? featuredImgEl.src : '',
+    featuredImgAlt: document.getElementById('featuredImgAlt').value,
+    date: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    seo
+  };
+
+  if (isPage) {
+    let pages = load(STORAGE.pages) || [];
+    if (editingPage) {
+      const idx = pages.findIndex(p => p.id === editingPage);
+      if (idx !== -1) pages[idx] = { ...pages[idx], ...data };
+      else pages.push({ id: uid(), ...data });
+    } else {
+      pages.push({ id: uid(), ...data });
+    }
+    save(STORAGE.pages, pages);
+    closeModal('editorModal');
+    renderPages();
+    showToast(editingPage ? 'Page updated ✓' : 'Page created ✓', 'success');
+  } else {
+    const authorId = isAdmin() ? (document.getElementById('edAuthorSelect').value || currentUser.id) : currentUser.id;
+    let posts = load(STORAGE.posts);
+    if (!posts) posts = getDefaultPosts();
+    const postData = { ...data, category: document.getElementById('edCategory').value, emoji: document.getElementById('edEmoji').value || '📝', publishDate: document.getElementById('edPublishDate').value, readTime: readTime(content), authorId };
+    if (editingPost) {
+      const idx = posts.findIndex(p => p.id === editingPost);
+      if (idx !== -1) posts[idx] = { ...posts[idx], ...postData };
+      else posts.push({ id: uid(), ...postData });
+    } else {
+      posts.push({ id: uid(), ...postData });
+    }
+    save(STORAGE.posts, posts);
+    closeModal('editorModal');
+    renderPosts();
+    showToast(editingPost ? 'Post updated ✓' : 'Post created ✓', 'success');
+  }
+}
+
+function deletePage(id) {
+  if (!confirm('Delete this page?')) return;
+  let pages = load(STORAGE.pages) || [];
+  pages = pages.filter(p => p.id !== id);
+  save(STORAGE.pages, pages);
+  renderPages();
+  showToast('Page deleted');
+}
+
+/* ─── RTE ────────────────────────────────────────────── */
+function execCmd(cmd, val) {
+  document.getElementById('rteBody').focus();
+  document.execCommand(cmd, false, val || null);
+  updateReadTime();
+}
+function updateReadTime() {
+  const content = document.getElementById('rteBody').innerHTML;
+  document.getElementById('edReadTime').value = readTime(content);
+}
+function rteInsertLink() {
+  const url = prompt('Enter URL:');
+  if (url) { document.getElementById('rteBody').focus(); document.execCommand('createLink', false, url); }
+}
+function rteInsertImage() {
+  const url = prompt('Enter image URL:');
+  if (url) { document.getElementById('rteBody').focus(); document.execCommand('insertImage', false, url); }
+}
+function rteInsertCode() {
+  const code = prompt('Enter code:');
+  if (code) {
+    document.getElementById('rteBody').focus();
+    document.execCommand('insertHTML', false, `<pre><code>${escHtml(code)}</code></pre>`);
+  }
+}
+
+/* ─── TAGS ───────────────────────────────────────────── */
+function handleTagInput(e) {
+  const input = e.target;
+  if ((e.key === 'Enter' || e.key === ',') && input.value.trim()) {
+    e.preventDefault();
+    const tag = input.value.replace(',','').trim();
+    if (tag && !postTags.includes(tag)) {
+      postTags.push(tag);
+      renderTagsUI();
+    }
+    input.value = '';
+  } else if (e.key === 'Backspace' && !input.value && postTags.length) {
+    postTags.pop();
+    renderTagsUI();
+  }
+}
+function removeTag(idx) {
+  postTags.splice(idx, 1);
+  renderTagsUI();
+}
+function renderTagsUI() {
+  const wrap = document.getElementById('tagsWrap');
+  const input = document.getElementById('tagsInput');
+  wrap.innerHTML = '';
+  postTags.forEach((tag, i) => {
+    const span = document.createElement('span');
+    span.className = 'tags-input-tag';
+    span.innerHTML = `${escHtml(tag)}<button onclick="removeTag(${i})" type="button"><i class="fas fa-times"></i></button>`;
+    wrap.appendChild(span);
+  });
+  wrap.appendChild(input);
+}
+
+/* ─── FEATURED IMAGE ─────────────────────────────────── */
+function previewFeaturedImg(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('featuredImgWrap').innerHTML = `<img src="${e.target.result}" alt=""><button class="img-preview-remove" onclick="removeFeaturedImg()"><i class="fas fa-times"></i></button>`;
+  };
+  reader.readAsDataURL(file);
+}
+function removeFeaturedImg() {
+  document.getElementById('featuredImgWrap').innerHTML = `<div class="img-placeholder" onclick="document.getElementById('featuredImgInput').click()"><i class="fas fa-image"></i><span>Click to add featured image</span></div>`;
+  document.getElementById('featuredImgInput').value = '';
+}
+
+/* ─── EXTRA IMAGES ───────────────────────────────────── */
+function addExtraImages(files) {
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      extraImages.push({ name: file.name, src: e.target.result });
+      renderExtraImages();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function renderExtraImages() {
+  const list = document.getElementById('extraImagesList');
+  list.innerHTML = extraImages.map((img, i) => `
+    <div style="position:relative;border-radius:var(--radius);overflow:hidden;background:var(--black);aspect-ratio:1;border:1px solid var(--black-border)">
+      <img src="${img.src}" style="width:100%;height:100%;object-fit:cover">
+      <button onclick="removeExtraImage(${i})" style="position:absolute;top:.25rem;right:.25rem;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:.65rem;display:flex;align-items:center;justify-content:center"><i class="fas fa-times"></i></button>
+    </div>`).join('');
+}
+function removeExtraImage(idx) {
+  extraImages.splice(idx, 1);
+  renderExtraImages();
+}
+
+/* ─── ATTACHMENTS ────────────────────────────────────── */
+function addAttachments(files) {
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      attachments.push({ name: file.name, size: file.size, data: e.target.result, type: fileType(file.name) });
+      renderAttachments();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function renderAttachments() {
+  const list = document.getElementById('attachmentList');
+  if (!attachments.length) { list.innerHTML = ''; return; }
+  list.innerHTML = attachments.map((a, i) => `
+    <div class="attachment-item">
+      <span class="attachment-icon">${fileTypeIcon(a.name)}</span>
+      <div class="attachment-info">
+        <div class="attachment-name">${escHtml(a.name)}</div>
+        <div class="attachment-size">${fmtSize(a.size)}</div>
+      </div>
+      <button class="attachment-remove" onclick="removeAttachment(${i})"><i class="fas fa-times"></i></button>
+    </div>`).join('');
+}
+function removeAttachment(idx) {
+  attachments.splice(idx, 1);
+  renderAttachments();
+}
+
+/* ─── SEO ────────────────────────────────────────────── */
+function autoSlug() {
+  const title = document.getElementById('edTitle').value;
+  document.getElementById('edSlug').value = slugify(title);
+  updateSeoPreview();
+}
+function updateSeoPreview() {
+  const title = document.getElementById('edSeoTitle').value || document.getElementById('edTitle').value || '';
+  const desc = document.getElementById('edMetaDesc').value || document.getElementById('edExcerpt').value || '';
+  const slug = document.getElementById('edSlug').value || slugify(title);
+  const settings = load(STORAGE.settings) || {};
+  const baseUrl = settings.siteUrl || 'https://web3legals.com';
+
+  document.getElementById('seoPreviewUrl').textContent = `${baseUrl}/blog/${slug}`;
+  document.getElementById('seoPreviewTitle').textContent = (title ? title + ' — Web3Legals' : 'Web3Legals').slice(0, 65);
+  document.getElementById('seoPreviewDesc').textContent = desc.slice(0, 160) || 'Meta description will appear here…';
+
+  // Char counts
+  const tc = document.getElementById('seoTitleCount');
+  const dc = document.getElementById('seoDescCount');
+  const titleLen = title.length;
+  const descLen = desc.length;
+  tc.textContent = titleLen + '/60';
+  tc.className = 'char-count' + (titleLen > 60 ? ' over' : titleLen > 50 ? '' : ' warn');
+  dc.textContent = descLen + '/160';
+  dc.className = 'char-count' + (descLen > 160 ? ' over' : descLen > 120 ? '' : ' warn');
+}
+
+/* ─── MEDIA ──────────────────────────────────────────── */
+let previewingMedia = null;
+
+function renderMedia() {
+  const media = load(STORAGE.media) || [];
+  const search = (document.getElementById('mediaSearch')?.value || '').toLowerCase();
+  const filter = document.getElementById('mediaFilter')?.value || '';
+  const filtered = media.filter(m => {
+    const matchSearch = !search || m.name.toLowerCase().includes(search);
+    const matchType = !filter || m.type === filter;
+    return matchSearch && matchType;
+  });
+
+  const grid = document.getElementById('mediaGrid');
+  const empty = document.getElementById('mediaEmpty');
+  if (!filtered.length) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  grid.innerHTML = filtered.map(m => `
+    <div class="media-item" onclick="previewMedia('${m.id}')">
+      <div class="media-thumb">
+        ${m.type === 'image' ? `<img src="${m.data}" alt="${escHtml(m.name)}">` : `<div class="file-icon">${fileTypeIcon(m.name)}</div>`}
+      </div>
+      <div class="media-info">
+        <div class="media-name" title="${escHtml(m.name)}">${escHtml(m.name)}</div>
+        <div class="media-size">${fmtSize(m.size)}</div>
+      </div>
+      <div class="media-item-actions">
+        <button class="btn btn-sm btn-ghost btn-icon" onclick="event.stopPropagation();copyUrl('${m.id}')" title="Copy URL"><i class="fas fa-copy"></i></button>
+        <button class="btn btn-sm btn-danger btn-icon" onclick="event.stopPropagation();deleteMedia('${m.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+function handleMediaUpload(files) {
+  const media = load(STORAGE.media) || [];
+  let count = 0;
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      media.push({ id: uid(), name: file.name, size: file.size, type: fileType(file.name), data: e.target.result, uploadedAt: new Date().toISOString() });
+      count++;
+      if (count === files.length) {
+        save(STORAGE.media, media);
+        renderMedia();
+        showToast(`${count} file${count>1?'s':''} uploaded ✓`);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function previewMedia(id) {
+  const media = load(STORAGE.media) || [];
+  const item = media.find(m => m.id === id);
+  if (!item) return;
+  previewingMedia = id;
+  document.getElementById('mediaPreviewTitle').textContent = item.name;
+  const body = document.getElementById('mediaPreviewBody');
+  if (item.type === 'image') {
+    body.innerHTML = `<img src="${item.data}" style="max-width:100%;max-height:400px;object-fit:contain;border-radius:var(--radius)">`;
+  } else if (item.type === 'pdf') {
+    body.innerHTML = `<div style="text-align:center"><div style="font-size:4rem;margin-bottom:1rem">📄</div><p style="font-size:.85rem">${escHtml(item.name)}</p><p style="font-size:.75rem;color:var(--white-muted)">${fmtSize(item.size)}</p></div>`;
+  } else {
+    body.innerHTML = `<div style="text-align:center"><div style="font-size:4rem;margin-bottom:1rem">${fileTypeIcon(item.name)}</div><p style="font-size:.85rem">${escHtml(item.name)}</p><p style="font-size:.75rem;color:var(--white-muted)">${fmtSize(item.size)}</p></div>`;
+  }
+  document.getElementById('mediaDeleteBtn').onclick = () => { deleteMedia(id); closeModal('mediaPreviewModal'); };
+  openModal('mediaPreviewModal');
+}
+
+function copyUrl(id) {
+  const media = load(STORAGE.media) || [];
+  const item = media.find(m => m.id === id);
+  if (!item) return;
+  navigator.clipboard.writeText(item.data).then(() => showToast('URL copied ✓')).catch(() => showToast('Copy failed', 'error'));
+}
+
+function copyMediaUrl() {
+  if (previewingMedia) copyUrl(previewingMedia);
+}
+
+function deleteMedia(id) {
+  if (!confirm('Delete this file?')) return;
+  let media = load(STORAGE.media) || [];
+  media = media.filter(m => m.id !== id);
+  save(STORAGE.media, media);
+  renderMedia();
+  showToast('File deleted');
+}
+
+/* ─── DRAG & DROP MEDIA ──────────────────────────────── */
+function initMediaDropZone() {
+  const zone = document.getElementById('mediaDropZone');
+  if (!zone) return;
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    handleMediaUpload(e.dataTransfer.files);
+  });
+}
+
+/* ─── AUTHORS ────────────────────────────────────────── */
+let editingAuthor = null;
+let authorPhotoData = '';
+
+function renderAuthors() {
+  if (!isAdmin()) return;
+  const users = initUsers();
+  const posts = load(STORAGE.posts) || [];
+  const tbody = document.getElementById('authorsTableBody');
+  tbody.innerHTML = users.map(u => {
+    const postCount = posts.filter(p => p.authorId === u.id).length;
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:.75rem">
+        <div class="user-avatar" style="width:34px;height:34px;font-size:.8rem;flex-shrink:0">${u.photo ? `<img src="${u.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">` : u.name.charAt(0)}</div>
+        <div><div style="font-weight:500;color:var(--white);font-size:.85rem">${escHtml(u.name)}</div><div style="font-size:.72rem;color:var(--white-muted)">${u.bio ? escHtml(u.bio.slice(0,60))+'…' : ''}</div></div>
+      </div></td>
+      <td>${escHtml(u.email)}</td>
+      <td><span class="badge ${u.role==='admin'?'badge-gold':'badge-blue'}">${u.role}</span></td>
+      <td>${postCount}</td>
+      <td><label class="toggle"><input type="checkbox" ${u.active!==false?'checked':''} onchange="toggleAuthorActive('${u.id}',this.checked)"><span class="toggle-slider"></span></label></td>
+      <td><div class="td-actions">
+        <button class="btn btn-sm btn-ghost btn-icon" onclick='editAuthor("${u.id}")' title="Edit"><i class="fas fa-edit"></i></button>
+        ${u.id !== 'admin' ? `<button class="btn btn-sm btn-danger btn-icon" onclick='deleteAuthor("${u.id}")' title="Delete"><i class="fas fa-trash"></i></button>` : ''}
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function openAuthorModal() {
+  editingAuthor = null;
+  authorPhotoData = '';
+  document.getElementById('authorModalTitle').textContent = 'Add Author';
+  document.getElementById('authorName').value = '';
+  document.getElementById('authorEmail').value = '';
+  document.getElementById('authorPassword').value = '';
+  document.getElementById('authorRole').value = 'author';
+  document.getElementById('authorBio').value = '';
+  document.getElementById('authorTwitter').value = '';
+  document.getElementById('authorLinkedIn').value = '';
+  document.getElementById('authorTelegram').value = '';
+  document.getElementById('authorWebsite').value = '';
+  document.getElementById('authorPhotoPreview').innerHTML = '👤';
+  openModal('authorModal');
+}
+
+function editAuthor(id) {
+  const users = initUsers();
+  const user = users.find(u => u.id === id);
+  if (!user) return;
+  editingAuthor = id;
+  authorPhotoData = user.photo || '';
+  document.getElementById('authorModalTitle').textContent = 'Edit Author';
+  document.getElementById('authorName').value = user.name || '';
+  document.getElementById('authorEmail').value = user.email || '';
+  document.getElementById('authorPassword').value = '';
+  document.getElementById('authorPassword').placeholder = 'Leave blank to keep current';
+  document.getElementById('authorRole').value = user.role || 'author';
+  document.getElementById('authorBio').value = user.bio || '';
+  document.getElementById('authorTwitter').value = user.twitter || '';
+  document.getElementById('authorLinkedIn').value = user.linkedin || '';
+  document.getElementById('authorTelegram').value = user.telegram || '';
+  document.getElementById('authorWebsite').value = user.website || '';
+  const preview = document.getElementById('authorPhotoPreview');
+  if (user.photo) preview.innerHTML = `<img src="${user.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  else preview.innerHTML = user.name.charAt(0);
+  openModal('authorModal');
+}
+
+function previewAuthorPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    authorPhotoData = e.target.result;
+    document.getElementById('authorPhotoPreview').innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveAuthor() {
+  const name = document.getElementById('authorName').value.trim();
+  const email = document.getElementById('authorEmail').value.trim().toLowerCase();
+  const password = document.getElementById('authorPassword').value;
+  const role = document.getElementById('authorRole').value;
+
+  if (!name || !email) { showToast('Name and email are required', 'error'); return; }
+  if (!editingAuthor && !password) { showToast('Password is required for new authors', 'error'); return; }
+  if (password && password.length < 8) { showToast('Password must be at least 8 characters', 'error'); return; }
+
+  let users = initUsers();
+  const emailExists = users.some(u => u.email.toLowerCase() === email && u.id !== editingAuthor);
+  if (emailExists) { showToast('Email already in use', 'error'); return; }
+
+  const userData = {
+    name, email, role,
+    bio: document.getElementById('authorBio').value,
+    twitter: document.getElementById('authorTwitter').value,
+    linkedin: document.getElementById('authorLinkedIn').value,
+    telegram: document.getElementById('authorTelegram').value,
+    website: document.getElementById('authorWebsite').value,
+    photo: authorPhotoData,
+    active: true
+  };
+  if (password) userData.password = password;
+
+  if (editingAuthor) {
+    const idx = users.findIndex(u => u.id === editingAuthor);
+    if (idx !== -1) users[idx] = { ...users[idx], ...userData };
+  } else {
+    users.push({ id: uid(), ...userData });
+  }
+  save(STORAGE.users, users);
+  closeModal('authorModal');
+  renderAuthors();
+  showToast(editingAuthor ? 'Author updated ✓' : 'Author created ✓', 'success');
+}
+
+function toggleAuthorActive(id, active) {
+  let users = initUsers();
+  const idx = users.findIndex(u => u.id === id);
+  if (idx !== -1) users[idx].active = active;
+  save(STORAGE.users, users);
+  showToast(active ? 'Author activated' : 'Author deactivated');
+}
+
+function deleteAuthor(id) {
+  if (id === 'admin') { showToast('Cannot delete the admin account', 'error'); return; }
+  if (!confirm('Delete this author? Their posts will remain.')) return;
+  let users = initUsers();
+  users = users.filter(u => u.id !== id);
+  save(STORAGE.users, users);
+  renderAuthors();
+  showToast('Author deleted');
+}
+
+/* ─── PROFILE ────────────────────────────────────────── */
+let profilePhotoData = '';
+
+function renderProfile() {
+  if (!currentUser) return;
+  document.getElementById('profileName').value = currentUser.name || '';
+  document.getElementById('profileEmail').value = currentUser.email || '';
+  document.getElementById('profileBio').value = currentUser.bio || '';
+  document.getElementById('profileTwitter').value = currentUser.twitter || '';
+  document.getElementById('profileLinkedIn').value = currentUser.linkedin || '';
+  document.getElementById('profileTelegram').value = currentUser.telegram || '';
+  document.getElementById('profileWebsite').value = currentUser.website || '';
+  const preview = document.getElementById('profileAvatarPreview');
+  if (currentUser.photo) preview.innerHTML = `<img src="${currentUser.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  else preview.textContent = (currentUser.name || 'A').charAt(0);
+  profilePhotoData = currentUser.photo || '';
+}
+
+function previewProfilePhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    profilePhotoData = e.target.result;
+    document.getElementById('profileAvatarPreview').innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveProfile() {
+  let users = initUsers();
+  const idx = users.findIndex(u => u.id === currentUser.id);
+  if (idx === -1) return;
+  const updated = {
+    ...users[idx],
+    name: document.getElementById('profileName').value.trim() || users[idx].name,
+    bio: document.getElementById('profileBio').value,
+    twitter: document.getElementById('profileTwitter').value,
+    linkedin: document.getElementById('profileLinkedIn').value,
+    telegram: document.getElementById('profileTelegram').value,
+    website: document.getElementById('profileWebsite').value,
+    photo: profilePhotoData
+  };
+  users[idx] = updated;
+  save(STORAGE.users, users);
+  currentUser = updated;
+  save(STORAGE.session, { id: currentUser.id, ts: Date.now() });
+  renderUserBadge();
+  showToast('Profile saved ✓', 'success');
+}
+
+function showChangePassModal() { openModal('changePassModal'); }
+
+function savePasswordFromModal() {
+  const current = document.getElementById('cpCurrent').value;
+  const newPass = document.getElementById('cpNew').value;
+  const confirm = document.getElementById('cpConfirm').value;
+  if (current !== currentUser.password) { showToast('Current password is incorrect', 'error'); return; }
+  if (newPass.length < 8) { showToast('New password must be at least 8 characters', 'error'); return; }
+  if (newPass !== confirm) { showToast('Passwords do not match', 'error'); return; }
+  let users = initUsers();
+  const idx = users.findIndex(u => u.id === currentUser.id);
+  if (idx !== -1) { users[idx].password = newPass; currentUser.password = newPass; }
+  save(STORAGE.users, users);
+  closeModal('changePassModal');
+  showToast('Password updated ✓', 'success');
+}
+
+/* ─── SETTINGS ───────────────────────────────────────── */
+function renderSettingsPanel() {
+  const s = load(STORAGE.settings) || {};
+  setValue('setSiteName', s.siteName || 'Web3Legals');
+  setValue('setTagline', s.tagline || 'Premier Crypto & Blockchain Legal Counsel');
+  setValue('setSiteUrl', s.siteUrl || 'https://web3legals.com');
+  setValue('setEmail', s.email || 'web3legal@gmail.com');
+  setValue('setMetaDesc', s.metaDesc || '');
+  setValue('setOgImage', s.ogImage || '');
+  setValue('setTwitter', s.twitter || '');
+  setValue('setGA', s.ga || '');
+
+  const sec = load(STORAGE.secrets) || {};
+  setValueIfExists('setAnthropicKey', sec.anthropicKey || '');
+  setValueIfExists('setOpenAIKey', sec.openaiKey || '');
+  setValueIfExists('setZapier', sec.zapier || '');
+  setValueIfExists('setCFToken', sec.cfToken || '');
+}
+
+function setValue(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
+function setValueIfExists(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
+function getVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+
+function saveSettings() {
+  const s = load(STORAGE.settings) || {};
+  save(STORAGE.settings, {
+    ...s,
+    siteName: getVal('setSiteName'),
+    tagline: getVal('setTagline'),
+    siteUrl: getVal('setSiteUrl'),
+    email: getVal('setEmail'),
+    metaDesc: getVal('setMetaDesc'),
+    ogImage: getVal('setOgImage'),
+    twitter: getVal('setTwitter'),
+    ga: getVal('setGA')
+  });
+  showToast('Settings saved ✓', 'success');
+}
+
+function saveApiSecrets() {
+  save(STORAGE.secrets, {
+    anthropicKey: getVal('setAnthropicKey'),
+    openaiKey: getVal('setOpenAIKey'),
+    zapier: getVal('setZapier'),
+    cfToken: getVal('setCFToken')
+  });
+  showToast('Secrets saved ✓', 'success');
+}
+
+function changePassword() {
+  if (!isAdmin()) return;
+  const current = getVal('pwCurrent');
+  const newPass = getVal('pwNew');
+  const confirm = getVal('pwConfirm');
+  if (current !== currentUser.password) { showToast('Current password is incorrect', 'error'); return; }
+  if (newPass.length < 8) { showToast('Password must be at least 8 characters', 'error'); return; }
+  if (newPass !== confirm) { showToast('Passwords do not match', 'error'); return; }
+  let users = initUsers();
+  const idx = users.findIndex(u => u.id === currentUser.id);
+  if (idx !== -1) { users[idx].password = newPass; currentUser.password = newPass; }
+  save(STORAGE.users, users);
+  document.getElementById('pwCurrent').value = '';
+  document.getElementById('pwNew').value = '';
+  document.getElementById('pwConfirm').value = '';
+  showToast('Password changed ✓', 'success');
+}
+
+/* ─── KEYBOARD / GLOBAL EVENTS ──────────────────────── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+// Enter to login
+document.getElementById('loginPass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+/* ─── RESPONSIVE SIDEBAR TOGGLE ─────────────────────── */
+function checkMobileLayout() {
+  const toggle = document.getElementById('sidebarToggle');
+  if (window.innerWidth <= 900) toggle.style.display = 'block';
+  else toggle.style.display = 'none';
+}
+window.addEventListener('resize', checkMobileLayout);
+
+/* ─── BOOT ───────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  checkMobileLayout();
+  initMediaDropZone();
+  if (checkSession()) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appShell').style.display = 'block';
+    initApp();
+  }
+  // RTE focus to update read time
+  const rteBody = document.getElementById('rteBody');
+  if (rteBody) rteBody.addEventListener('input', updateReadTime);
+});
+</script>
+</body>
+</html>
+HTMLEOF

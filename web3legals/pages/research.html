@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Research — Web3Legals | Crypto Regulation Research Papers</title>
+  <meta name="description" content="In-depth research papers on crypto regulation, blockchain law, DeFi compliance, and global digital asset frameworks from Web3Legals.">
+  <link rel="canonical" href="https://web3legals.com/pages/research.html">
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/layout.js" defer></script>
+</head>
+<body>
+<main style="padding-top:70px;">
+
+<section style="background:var(--black-soft);border-bottom:1px solid var(--black-border);padding:4rem 0 3rem;">
+  <div class="container">
+    <div class="breadcrumb"><a href="../index.html">Home</a><span class="sep">›</span><span>Research</span></div>
+    <span class="section-label">Academic & Policy Research</span>
+    <h1>Crypto Law Research Papers</h1>
+    <div class="divider"></div>
+    <p style="max-width:620px;">Deep-dive regulatory analysis, comparative jurisdiction studies, and policy research on the legal frontiers of blockchain, DeFi, and digital assets.</p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div id="researchGrid" class="grid-2" style="gap:2rem;"></div>
+  </div>
+</section>
+
+<style>
+.research-card {
+  background: var(--black-card);
+  border: 1px solid var(--black-border);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  transition: all var(--transition);
+  display: flex; gap: 1.5rem;
+}
+.research-card:hover { border-color: var(--gold); box-shadow: var(--gold-glow); }
+.research-num {
+  font-family: var(--font-mono); font-size: 2rem; font-weight: 700;
+  color: var(--gold); opacity: 0.3; flex-shrink: 0; line-height: 1;
+  min-width: 3rem;
+}
+.research-meta { display: flex; gap: 0.75rem; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; }
+.research-meta span { font-size: 0.75rem; color: var(--white-muted); }
+</style>
+
+<script>
+const RESEARCH = [
+  {
+    num: '01', title: 'Comparative Analysis of Global VASP Licensing Regimes: UAE, Singapore, EU, and UK',
+    tags: ['Licensing', 'Comparative Law'], date: 'Q4 2024', pages: '42 pages',
+    abstract: 'A comprehensive comparative study of Virtual Asset Service Provider licensing frameworks across four major jurisdictions. Analyses capital requirements, AML obligations, timelines, and operational implications for crypto businesses seeking optimal jurisdiction selection. Includes a decision matrix for VASP jurisdiction selection.',
+    highlights: ['UAE VARA requires AED 1–4M minimum capital', 'Singapore MAS PSA: S$250K base capital for MPI', 'EU MiCA enables single-licence passporting across 27 states', 'UK FCA registration ≠ authorisation — critical distinction for firms']
+  },
+  {
+    num: '02', title: 'MiCA Deep Dive: Implementation Challenges and Compliance Roadmap for CASPs',
+    tags: ['MiCA', 'EU Regulation'], date: 'Q4 2024', pages: '38 pages',
+    abstract: 'An authoritative analysis of the EU\'s Markets in Crypto-Assets Regulation implementation challenges. Covers the transition from national regimes, whitepaper obligations, stablecoin reserve requirements, and the 18-month grandfathering period. Includes model compliance timelines for different CASP categories.',
+    highlights: ['6-month stablecoin rules (June 2024) vs 12-month CASP rules', 'National competent authority variance in implementation', 'ESMA technical standards — what\'s still outstanding', 'Conflict with MiFID II for tokenised securities']
+  },
+  {
+    num: '03', title: 'DAO Legal Structures: A Comparative Analysis Across Seven Jurisdictions',
+    tags: ['DAO Law', 'Corporate Law'], date: 'Q3 2024', pages: '35 pages',
+    abstract: 'The definitive academic treatment of DAO legal wrappers, comparing Cayman Foundation, Wyoming DAO LLC, Marshall Islands DAO, Swiss Association, Liechtenstein Foundation, Singapore CLG, and Panamanian Foundation structures. Analyses governance flexibility, liability protection, tax treatment, and practical formation costs.',
+    highlights: ['Cayman Foundation: optimal for large protocol DAOs', 'Wyoming DAO LLC: best for on-chain governance recognition in US', 'Marshall Islands: most permissive, fastest formation', 'Swiss Association: preferred for European community DAOs']
+  },
+  {
+    num: '04', title: 'DeFi Regulatory Risk Assessment Framework: A Protocol-Level Methodology',
+    tags: ['DeFi', 'Risk Assessment'], date: 'Q3 2024', pages: '29 pages',
+    abstract: 'A structured methodology for assessing regulatory risk at the protocol level. Introduces the "Decentralisation Spectrum" model for evaluating whether a DeFi protocol falls within financial services regulation, and provides a decision tree for key regulatory questions including securities law, AML obligations, and consumer protection.',
+    highlights: ['Decentralisation Spectrum: 5-factor test for regulatory treatment', 'Admin key control as key regulatory risk factor', 'Revenue-generating protocols face higher regulatory scrutiny', 'Front-end vs smart contract liability distinction']
+  },
+  {
+    num: '05', title: 'Stablecoin Regulation: Post-MiCA Global Landscape and Emerging Frameworks',
+    tags: ['Stablecoins', 'Global Regulation'], date: 'Q2 2024', pages: '31 pages',
+    abstract: 'A global survey of stablecoin regulation following MiCA\'s June 2024 implementation. Examines how the US, UK, Hong Kong, Singapore, UAE, and Switzerland approach stablecoin oversight, reserve requirements, and issuer licensing. Analyses market impact of Tether\'s EU delisting and implications for global stablecoin liquidity.',
+    highlights: ['Five distinct regulatory models identified globally', 'US stablecoin legislation: current congressional status', 'HKMA stablecoin licensing expected H1 2025', 'Reserve audit standards diverge significantly across jurisdictions']
+  },
+  {
+    num: '06', title: 'NFT Legal Classification: Securities, Commodities, Collectibles, or Sui Generis?',
+    tags: ['NFT', 'Securities Law'], date: 'Q2 2024', pages: '26 pages',
+    abstract: 'A doctrinal analysis of NFT classification across US, EU, UK, Singapore, and UAE legal frameworks. Applies the Howey Test, EU MiCA classification criteria, and equivalent tests in other jurisdictions to various NFT structures including PFPs, fractionalized NFTs, gaming assets, and music/IP NFTs.',
+    highlights: ['Fractionalized NFTs almost always securities under Howey', 'EU MiCA explicitly excludes "unique" NFTs — but definition is narrow', 'Gaming NFTs: utilities vs. investment assets distinction', 'UK FCA considers most "investment" NFTs as controlled investments']
+  },
+  {
+    num: '07', title: 'FATF Travel Rule Implementation: Technical and Legal Challenges for the Crypto Industry',
+    tags: ['AML', 'FATF'], date: 'Q1 2024', pages: '33 pages',
+    abstract: 'A comprehensive analysis of the FATF Travel Rule\'s application to virtual assets, examining technical implementation challenges, current industry solutions (IVMS101, Sygna, Notabene, VerifyVASP), and the complex legal questions surrounding unhosted wallets, DeFi, and cross-border transfers between asymmetrically regulated jurisdictions.',
+    highlights: ['IVMS101 data standard: adoption rates by jurisdiction', 'Unhosted wallet rules: EU TFR vs. US vs. Asia Pacific divergence', 'Sunrise problem: non-compliant jurisdictions create asymmetric obligations', 'Liability allocation when counterparty VASP is unresponsive']
+  },
+  {
+    num: '08', title: 'Crypto Tax Frameworks: Global Comparative Study Across 15 Jurisdictions',
+    tags: ['Tax Law', 'Comparative'], date: 'Q1 2024', pages: '48 pages',
+    abstract: 'The most comprehensive comparative crypto tax study available, covering 15 jurisdictions including UAE (0% CGT), Singapore (0% CGT), Switzerland, UK, Germany, US, Australia, India (30% flat), France, Portugal, Malta, Cayman, BVI, El Salvador, and Japan. Analyses capital gains treatment, mining/staking income, DeFi yield, and corporate treasury holdings.',
+    highlights: ['UAE and Cayman: 0% capital gains, 0% corporate tax', 'Germany: 1-year holding period exempts crypto gains (individuals)', 'India: harshest regime — 30% flat + no loss offset + 1% TDS', 'US: crypto-to-crypto swaps are taxable events — unique globally']
+  }
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+  const grid = document.getElementById('researchGrid');
+  grid.innerHTML = RESEARCH.map(r => `
+    <div class="research-card fade-in">
+      <div class="research-num">${r.num}</div>
+      <div style="flex:1;">
+        <div class="research-meta">
+          ${r.tags.map(t => `<span class="tag tag-gold">${t}</span>`).join('')}
+          <span>${r.date}</span>
+          <span>${r.pages}</span>
+        </div>
+        <h3 style="font-size:1.05rem;margin-bottom:0.75rem;">${r.title}</h3>
+        <p style="font-size:0.875rem;margin-bottom:1.25rem;">${r.abstract}</p>
+        <div style="background:var(--black);border-radius:var(--radius);padding:1rem;margin-bottom:1.25rem;">
+          <p style="font-size:0.7rem;font-family:var(--font-mono);letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:0.75rem;">Key Findings</p>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:0.4rem;">
+            ${r.highlights.map(h => `<li style="font-size:0.8rem;color:var(--white-muted);display:flex;gap:0.5rem;"><span style="color:var(--gold);flex-shrink:0;">›</span>${h}</li>`).join('')}
+          </ul>
+        </div>
+        <a href="../pages/contact.html" class="btn btn-outline" style="font-size:0.8rem;padding:0.5rem 1rem;">Request Full Paper →</a>
+      </div>
+    </div>`).join('');
+
+  document.querySelectorAll('.fade-in').forEach(el => {
+    const obs = new IntersectionObserver(e => { if(e[0].isIntersecting){el.classList.add('visible');obs.unobserve(el);} },{threshold:0.1});
+    obs.observe(el);
+  });
+});
+</script>
+</body>
+</html>
