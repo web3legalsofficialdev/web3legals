@@ -573,6 +573,12 @@ tbody tr:last-child td{border-bottom:none}
           </div>
         </div>
         <div class="tab-panel" id="st-3">
+          <div class="card" style="margin-bottom:1rem;border-color:var(--gold)">
+            <div class="card-header"><span class="card-title">🚀 Migrate to Cloudflare D1</span></div>
+            <p style="font-size:.82rem;margin-bottom:1.25rem">Export all your current localStorage posts, pages, media and users into the Cloudflare D1 database. Run this once after setting up the Worker.</p>
+            <button class="btn btn-gold" onclick="migrateToD1()"><i class="fas fa-database"></i> Run Migration Now</button>
+            <div id="migrateStatus" style="margin-top:1rem;font-size:.82rem;display:none"></div>
+          </div>
           <div class="card">
             <div class="card-header"><span class="card-title">Change Admin Password</span></div>
             <div class="form-row form-row-2">
@@ -988,6 +994,25 @@ function save(key, val) {
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
+
+/* ─── API CONFIG ─────────────────────────────────────── */
+const API_BASE = 'https://web3legals-api.web3legalsofficialdev.workers.dev'; // Cloudflare Worker API
+let API_SECRET = localStorage.getItem('w3l_api_secret') || '';
+function apiHeaders() {
+  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_SECRET };
+}
+async function apiGet(path) {
+  try { const r = await fetch(API_BASE + path); if (!r.ok) return null; return await r.json(); } catch(e) { return null; }
+}
+async function apiPost(path, data) {
+  try { const r = await fetch(API_BASE + path, { method:'POST', headers:apiHeaders(), body:JSON.stringify(data) }); return await r.json(); } catch(e) { showToast('API error','error'); return null; }
+}
+async function apiPut(path, data) {
+  try { const r = await fetch(API_BASE + path, { method:'PUT', headers:apiHeaders(), body:JSON.stringify(data) }); return await r.json(); } catch(e) { showToast('API error','error'); return null; }
+}
+async function apiDelete(path) {
+  try { const r = await fetch(API_BASE + path, { method:'DELETE', headers:apiHeaders() }); return await r.json(); } catch(e) { showToast('API error','error'); return null; }
+}
 function fmtDate(d) {
   if (!d) return '';
   const dt = new Date(d);
@@ -1067,18 +1092,62 @@ function initUsers() {
   return users;
 }
 
-function doLogin() {
+async function initUsersAsync() {
+  // Try API first
+  const apiUsers = await apiGet('/api/users');
+  if (apiUsers && apiUsers.length) {
+    // Cache locally for offline fallback
+    save(STORAGE.users, apiUsers);
+    return apiUsers;
+  }
+  // Fallback to localStorage
+  return initUsers();
+}
+
+async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim().toLowerCase();
   const pass = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+
+  // Try API login first
+  try {
+    const res = await fetch(API_BASE + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pass })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.ok && data.user) {
+        // Store password locally for re-auth (needed for API secret)
+        data.user.password = pass;
+        save(STORAGE.session, { id: data.user.id, ts: Date.now() });
+        // Store API secret = password for write operations
+        API_SECRET = pass;
+        localStorage.setItem('w3l_api_secret', pass);
+        currentUser = data.user;
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('appShell').style.display = 'block';
+        initApp();
+        return;
+      }
+    }
+  } catch(e) {
+    // API unreachable — fall back to localStorage login
+  }
+
+  // Fallback: localStorage login (works offline / before Worker is set up)
   const users = initUsers();
   const user = users.find(u => u.email.toLowerCase() === email && u.password === pass && u.active !== false);
   if (!user) {
-    const errEl = document.getElementById('loginError');
     errEl.textContent = 'Invalid email or password.';
     errEl.style.display = 'block';
     return;
   }
   save(STORAGE.session, { id: user.id, ts: Date.now() });
+  API_SECRET = pass;
+  localStorage.setItem('w3l_api_secret', pass);
   currentUser = user;
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appShell').style.display = 'block';
@@ -1098,7 +1167,8 @@ function doLogout() {
 function checkSession() {
   const sess = load(STORAGE.session);
   if (!sess) return false;
-  const users = initUsers();
+  // Try to validate against API first, fall back to localStorage users
+  const users = await initUsersAsync();
   const user = users.find(u => u.id === sess.id && u.active !== false);
   if (!user) return false;
   currentUser = user;
@@ -1216,11 +1286,19 @@ function toggleCollapsible(header) {
 }
 
 /* ─── DASHBOARD ──────────────────────────────────────── */
-function renderDashboard() {
-  const posts = load(STORAGE.posts) || [];
-  const pages = load(STORAGE.pages) || [];
-  const media = load(STORAGE.media) || [];
-  const users = initUsers();
+async function renderDashboard() {
+  // Load from API, cache locally
+  const [apiPosts, apiPages, apiMedia] = await Promise.all([
+    apiGet('/api/posts'), apiGet('/api/pages'), apiGet('/api/media')
+  ]);
+  if (apiPosts) save(STORAGE.posts, apiPosts);
+  if (apiPages) save(STORAGE.pages, apiPages);
+  if (apiMedia) save(STORAGE.media, apiMedia);
+
+  const posts = apiPosts || load(STORAGE.posts) || [];
+  const pages = apiPages || load(STORAGE.pages) || [];
+  const media = apiMedia || load(STORAGE.media) || [];
+  const users = await initUsersAsync();
   const myPosts = isAdmin() ? posts : posts.filter(p => p.authorId === currentUser.id);
 
   document.getElementById('dashStats').innerHTML = `
@@ -1270,7 +1348,9 @@ function getDefaultPosts() {
   ];
 }
 
-function renderPosts() {
+async function renderPosts() {
+  const apiPosts = await apiGet('/api/posts');
+  if (apiPosts) save(STORAGE.posts, apiPosts);
   const posts = getPosts();
   const search = document.getElementById('postsSearch')?.value.toLowerCase() || '';
   const statusFilter = document.getElementById('postsFilterStatus')?.value || '';
@@ -1423,9 +1503,10 @@ function editPost(id) {
 }
 
 
-function deletePost(id) {
+async function deletePost(id) {
   if (!confirm('Delete this post? This cannot be undone.')) return;
-  let posts = load(STORAGE.posts) || getDefaultPosts();
+  await apiDelete('/api/posts/' + id);
+  let posts = load(STORAGE.posts) || [];
   posts = posts.filter(p => p.id !== id);
   save(STORAGE.posts, posts);
   renderPosts();
@@ -1499,7 +1580,9 @@ function switchToFirstTab(prefix) {
 
 /* ─── PAGES ──────────────────────────────────────────── */
 
-function renderPages() {
+async function renderPages() {
+  const apiPages = await apiGet('/api/pages');
+  if (apiPages) save(STORAGE.pages, apiPages);
   const pages = load(STORAGE.pages) || [];
   const myPages = isAdmin() ? pages : pages.filter(p => p.authorId === currentUser.id);
   const tbody = document.getElementById('pagesTableBody');
@@ -1633,22 +1716,42 @@ function savePost() {
     } else {
       pages.push({ id: uid(), ...data });
     }
+    // Save page via API
+    if (editingPage) {
+      await apiPut('/api/pages/' + editingPage, data);
+    } else {
+      data.id = uid();
+      await apiPost('/api/pages', data);
+    }
+    // Update local cache
+    let pages = load(STORAGE.pages) || [];
+    if (editingPage) {
+      const idx = pages.findIndex(p => p.id === editingPage);
+      if (idx !== -1) pages[idx] = { ...pages[idx], ...data };
+      else pages.push(data);
+    } else { pages.push(data); }
     save(STORAGE.pages, pages);
     closeModal('editorModal');
     renderPages();
     showToast(editingPage ? 'Page updated ✓' : 'Page created ✓', 'success');
   } else {
     const authorId = isAdmin() ? (document.getElementById('edAuthorSelect').value || currentUser.id) : currentUser.id;
-    let posts = load(STORAGE.posts);
-    if (!posts) posts = getDefaultPosts();
     const postData = { ...data, category: document.getElementById('edCategory').value, emoji: document.getElementById('edEmoji').value || '📝', publishDate: document.getElementById('edPublishDate').value, readTime: readTime(content), authorId };
+
+    // Save post via API
+    if (editingPost) {
+      await apiPut('/api/posts/' + editingPost, postData);
+    } else {
+      postData.id = uid();
+      await apiPost('/api/posts', postData);
+    }
+    // Update local cache
+    let posts = load(STORAGE.posts) || getDefaultPosts();
     if (editingPost) {
       const idx = posts.findIndex(p => p.id === editingPost);
       if (idx !== -1) posts[idx] = { ...posts[idx], ...postData };
-      else posts.push({ id: uid(), ...postData });
-    } else {
-      posts.push({ id: uid(), ...postData });
-    }
+      else posts.push(postData);
+    } else { posts.push(postData); }
     save(STORAGE.posts, posts);
     closeModal('editorModal');
     renderPosts();
@@ -1656,8 +1759,9 @@ function savePost() {
   }
 }
 
-function deletePage(id) {
+async function deletePage(id) {
   if (!confirm('Delete this page?')) return;
+  await apiDelete('/api/pages/' + id);
   let pages = load(STORAGE.pages) || [];
   pages = pages.filter(p => p.id !== id);
   save(STORAGE.pages, pages);
@@ -1823,7 +1927,9 @@ function updateSeoPreview() {
 /* ─── MEDIA ──────────────────────────────────────────── */
 let previewingMedia = null;
 
-function renderMedia() {
+async function renderMedia() {
+  const apiMedia = await apiGet('/api/media');
+  if (apiMedia) save(STORAGE.media, apiMedia);
   const media = load(STORAGE.media) || [];
   const search = (document.getElementById('mediaSearch')?.value || '').toLowerCase();
   const filter = document.getElementById('mediaFilter')?.value || '';
@@ -1866,6 +1972,11 @@ function handleMediaUpload(files) {
       media.push({ id: uid(), name: file.name, size: file.size, type: fileType(file.name), data: e.target.result, uploadedAt: new Date().toISOString() });
       count++;
       if (count === files.length) {
+        // Save each new file to API
+        const newFiles = media.slice(media.length - count);
+        for (const f of newFiles) {
+          await apiPost('/api/media', f);
+        }
         save(STORAGE.media, media);
         renderMedia();
         showToast(`${count} file${count>1?'s':''} uploaded ✓`);
@@ -1904,8 +2015,9 @@ function copyMediaUrl() {
   if (previewingMedia) copyUrl(previewingMedia);
 }
 
-function deleteMedia(id) {
+async function deleteMedia(id) {
   if (!confirm('Delete this file?')) return;
+  await apiDelete('/api/media/' + id);
   let media = load(STORAGE.media) || [];
   media = media.filter(m => m.id !== id);
   save(STORAGE.media, media);
@@ -1930,9 +2042,11 @@ function initMediaDropZone() {
 let editingAuthor = null;
 let authorPhotoData = '';
 
-function renderAuthors() {
+async function renderAuthors() {
   if (!isAdmin()) return;
-  const users = initUsers();
+  const users = await initUsersAsync();
+  const apiPosts = await apiGet('/api/posts');
+  if (apiPosts) save(STORAGE.posts, apiPosts);
   const posts = load(STORAGE.posts) || [];
   const tbody = document.getElementById('authorsTableBody');
   tbody.innerHTML = users.map(u => {
@@ -2037,6 +2151,14 @@ function saveAuthor() {
   } else {
     users.push({ id: uid(), ...userData });
   }
+  // Save to API
+  if (editingAuthor) {
+    await apiPut('/api/users/' + editingAuthor, { ...userData, id: editingAuthor });
+  } else {
+    const newUser = { ...userData, id: uid() };
+    users.push(newUser);
+    await apiPost('/api/users', newUser);
+  }
   save(STORAGE.users, users);
   closeModal('authorModal');
   renderAuthors();
@@ -2051,9 +2173,10 @@ function toggleAuthorActive(id, active) {
   showToast(active ? 'Author activated' : 'Author deactivated');
 }
 
-function deleteAuthor(id) {
+async function deleteAuthor(id) {
   if (id === 'admin') { showToast('Cannot delete the admin account', 'error'); return; }
   if (!confirm('Delete this author? Their posts will remain.')) return;
+  await apiDelete('/api/users/' + id);
   let users = initUsers();
   users = users.filter(u => u.id !== id);
   save(STORAGE.users, users);
@@ -2105,6 +2228,7 @@ function saveProfile() {
     photo: profilePhotoData
   };
   users[idx] = updated;
+  await apiPut('/api/users/' + currentUser.id, updated);
   save(STORAGE.users, users);
   currentUser = updated;
   save(STORAGE.session, { id: currentUser.id, ts: Date.now() });
@@ -2151,6 +2275,38 @@ function renderSettingsPanel() {
 function setValue(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
 function setValueIfExists(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
 function getVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+
+async function migrateToD1() {
+  const statusEl = document.getElementById('migrateStatus');
+  statusEl.style.display = 'block';
+  statusEl.style.color = 'var(--gold)';
+  statusEl.textContent = '⏳ Migrating data to D1...';
+
+  const posts = load(STORAGE.posts) || [];
+  const pages = load(STORAGE.pages) || [];
+  const users = load(STORAGE.users) || initUsers();
+  const media = load(STORAGE.media) || [];
+
+  try {
+    const res = await fetch(API_BASE + '/api/migrate', {
+      method: 'POST',
+      headers: apiHeaders(),
+      body: JSON.stringify({ posts, pages, users, media })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      statusEl.style.color = 'var(--success)';
+      statusEl.textContent = `✅ Migration complete! ${posts.length} posts, ${pages.length} pages, ${users.length} users, ${media.length} media files migrated to D1.`;
+      showToast('Migration complete ✓', 'success');
+    } else {
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = '❌ Migration failed: ' + (data.error || 'Unknown error');
+    }
+  } catch(e) {
+    statusEl.style.color = 'var(--danger)';
+    statusEl.textContent = '❌ Could not reach Worker API. Make sure it is deployed and the URL is correct.';
+  }
+}
 
 function saveSettings() {
   const s = load(STORAGE.settings) || {};
@@ -2234,42 +2390,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // RTE focus to update read time
   const rteBody = document.getElementById('rteBody');
   if (rteBody) rteBody.addEventListener('input', updateReadTime);
-
-  // ─── RTE PASTE FIX ───────────────────────────────────────
-  // When a user pastes HTML source code (<h2>...</h2>) as plain
-  // text into a contenteditable div, the browser escapes every
-  // < and > to &lt; and &gt;. rteBody.innerHTML then stores the
-  // escaped version, and the blog renders raw tag text instead
-  // of formatted HTML.
-  //
-  // Fix: intercept the paste event. If the clipboard text looks
-  // like HTML (contains < tags), insert it with execCommand
-  // insertHTML so the browser parses and renders it correctly.
-  // Plain-text pastes (no < characters) pass through unchanged.
-  if (rteBody) {
-    rteBody.addEventListener('paste', function(e) {
-      // Get plain text from clipboard
-      const plain = (e.clipboardData || window.clipboardData).getData('text/plain');
-      // Get rich HTML from clipboard (from Word, browser copy etc.)
-      const richHtml = (e.clipboardData || window.clipboardData).getData('text/html');
-
-      // If the clipboard has rich HTML (copied from a browser/doc), use it directly
-      if (richHtml && richHtml.trim()) {
-        e.preventDefault();
-        document.execCommand('insertHTML', false, richHtml);
-        return;
-      }
-
-      // If plain text contains HTML tags, insert as HTML not as text
-      if (plain && /<[a-zA-Z][^>]*>/.test(plain)) {
-        e.preventDefault();
-        document.execCommand('insertHTML', false, plain);
-        return;
-      }
-
-      // Otherwise: normal plain-text paste — let the browser handle it
-    });
-  }
 });
 </script>
 </body>
