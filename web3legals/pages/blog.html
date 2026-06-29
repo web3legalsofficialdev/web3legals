@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Blog — Web3Legals | Crypto & Blockchain Legal Insights</title>
-  <meta name="description" content="Expert legal insights on crypto regulation, DeFi compliance, token law, DAO structuring, and blockchain legal developments from Web3Legals.">
+  <title>Blog — Web3Legals | Crypto Law & Regulation Articles</title>
+  <meta name="description" content="Expert articles on crypto regulation, blockchain law, DeFi compliance, NFT legality, and global Web3 regulatory updates from Web3Legals.">
   <link rel="canonical" href="https://web3legals.com/pages/blog.html">
   <link rel="stylesheet" href="../css/style.css">
   <script src="../js/layout.js" defer></script>
@@ -12,452 +12,171 @@
 <body>
 <main style="padding-top:70px;">
 
-<!-- PAGE HERO -->
 <section style="background:var(--black-soft);border-bottom:1px solid var(--black-border);padding:4rem 0 3rem;">
   <div class="container">
-    <div class="breadcrumb">
-      <a href="../index.html">Home</a>
-      <span class="sep">›</span>
-      <span>Blog</span>
-    </div>
-    <span class="section-label">Knowledge Base</span>
-    <h1>Crypto Legal Insights</h1>
+    <div class="breadcrumb"><a href="../index.html">Home</a><span class="sep">›</span><span>Blog</span></div>
+    <span class="section-label">Legal Insights</span>
+    <h1>Crypto Law & Regulation Blog</h1>
     <div class="divider"></div>
-    <p style="max-width:620px;">In-depth articles on crypto regulation, DeFi compliance, token law, DAO structuring, and the evolving global legal landscape for Web3 businesses.</p>
+    <p style="max-width:600px;">In-depth articles on blockchain law, DeFi compliance, token regulation, and global crypto legal developments — written for founders, legal teams, and Web3 builders.</p>
   </div>
 </section>
 
 <!-- FILTERS -->
 <section style="padding:2rem 0;border-bottom:1px solid var(--black-border);">
   <div class="container">
-    <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
-      <div style="position:relative;flex:1;min-width:240px;">
-        <span style="position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:var(--white-muted);font-size:.85rem;">🔍</span>
-        <input type="text" id="searchInput" class="form-input" placeholder="Search articles…" style="padding-left:2.5rem;" oninput="filterPosts()">
-      </div>
-      <select class="form-select" id="categoryFilter" style="width:auto;" onchange="filterPosts()">
-        <option value="">All Categories</option>
-      </select>
-      <select class="form-select" id="sortFilter" style="width:auto;" onchange="filterPosts()">
-        <option value="newest">Newest First</option>
-        <option value="oldest">Oldest First</option>
-      </select>
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+      <span style="font-size:0.8rem;color:var(--white-muted);font-family:var(--font-mono);letter-spacing:0.1em;text-transform:uppercase;margin-right:0.5rem;">Filter:</span>
+      <button class="filter-btn active" data-cat="All">All</button>
+      <button class="filter-btn" data-cat="MiCA">MiCA / EU</button>
+      <button class="filter-btn" data-cat="UAE">UAE</button>
+      <button class="filter-btn" data-cat="Singapore">Singapore</button>
+      <button class="filter-btn" data-cat="DeFi">DeFi</button>
+      <button class="filter-btn" data-cat="DAO">DAO</button>
+      <button class="filter-btn" data-cat="NFT">NFT</button>
+      <button class="filter-btn" data-cat="Token">Token Law</button>
     </div>
   </div>
 </section>
 
-<!-- POSTS GRID -->
+<!-- ARTICLES GRID -->
 <section>
   <div class="container">
-    <div class="grid-3" id="blogGrid" style="margin-bottom:2rem;"></div>
-    <div id="blogEmpty" class="text-center" style="display:none;padding:4rem 0;">
-      <div style="font-size:3rem;margin-bottom:1rem;">📭</div>
-      <h3 style="margin-bottom:.5rem;">No articles found</h3>
-      <p>Try a different search or category filter.</p>
-    </div>
-    <div id="loadMoreWrap" class="text-center" style="display:none;margin-top:2rem;">
-      <button class="btn btn-outline" onclick="loadMore()">Load More Articles</button>
+    <div class="grid-3" id="blogGrid"></div>
+    <div class="text-align:center;margin-top:3rem;" id="noResults" style="display:none;text-align:center;padding:3rem;">
+      <p>No articles found for this filter.</p>
     </div>
   </div>
 </section>
 
 <!-- ARTICLE MODAL -->
-<div id="articleModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;overflow-y:auto;backdrop-filter:blur(6px);">
-  <div style="max-width:860px;margin:2rem auto;background:var(--black-card);border:1px solid var(--black-border);border-radius:var(--radius-lg);position:relative;">
-    <!-- Close -->
-    <button onclick="closeArticle()" style="position:fixed;top:1.5rem;right:1.5rem;background:var(--black-card);border:1px solid var(--black-border);color:var(--white);width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;z-index:10;transition:all .2s;">✕</button>
-
-    <!-- Hero image / emoji -->
-    <div id="articleHero" style="height:220px;background:linear-gradient(135deg,var(--black-soft),var(--black-card));display:flex;align-items:center;justify-content:center;font-size:5rem;border-radius:var(--radius-lg) var(--radius-lg) 0 0;border-bottom:1px solid var(--black-border);"></div>
-
-    <!-- Content -->
-    <div style="padding:2.5rem;">
-      <!-- Meta -->
-      <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin-bottom:1.25rem;">
-        <span class="tag tag-gold" id="articleCategory"></span>
-        <span style="font-size:.8rem;color:var(--white-muted);" id="articleDate"></span>
-        <span style="font-size:.8rem;color:var(--white-muted);" id="articleReadTime"></span>
-        <span style="font-size:.8rem;color:var(--white-muted);" id="articleAuthor"></span>
-      </div>
-
-      <!-- Title -->
-      <h1 id="articleTitle" style="font-size:clamp(1.4rem,3vw,2rem);margin-bottom:1rem;line-height:1.3;"></h1>
-
-      <!-- Excerpt -->
-      <p id="articleExcerpt" style="font-size:1rem;color:var(--white-muted);border-left:3px solid var(--gold);padding-left:1rem;margin-bottom:2rem;font-style:italic;"></p>
-
-      <!-- Tags -->
-      <div id="articleTags" style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:2rem;"></div>
-
-      <!-- Body -->
-      <div id="articleBody" style="font-size:.95rem;line-height:1.85;color:var(--white-muted);"></div>
-
-      <!-- Featured image -->
-      <div id="articleFeaturedImg" style="margin:2rem 0;"></div>
-
-      <!-- Attachments -->
-      <div id="articleAttachments" style="margin-top:2rem;"></div>
-
-      <!-- CTA -->
-      <div style="margin-top:3rem;padding:2rem;background:linear-gradient(135deg,rgba(201,168,76,.06),var(--black-soft));border:1px solid var(--black-border);border-radius:var(--radius-lg);text-align:center;">
-        <h3 style="margin-bottom:.75rem;">Need legal advice on this topic?</h3>
-        <p style="margin-bottom:1.5rem;font-size:.9rem;">Book a free consultation with Rahul Pareek and get expert guidance tailored to your situation.</p>
-        <a href="contact.html" class="btn btn-gold">Book a Free Consultation</a>
-      </div>
-    </div>
+<div id="articleModal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.85);overflow-y:auto;padding:2rem 1rem;">
+  <div style="max-width:800px;margin:0 auto;background:var(--black-card);border:1px solid var(--black-border);border-radius:var(--radius-lg);padding:3rem 2.5rem;position:relative;">
+    <button onclick="closeModal()" style="position:absolute;top:1.5rem;right:1.5rem;background:var(--black-border);border:none;color:var(--white);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.1rem;">✕</button>
+    <div id="articleContent"></div>
   </div>
 </div>
 
 <style>
-/* ── Article body styles ── */
-#articleBody h2 { font-family: var(--font-display); font-size: 1.4rem; color: var(--white); margin: 2rem 0 .75rem; padding-bottom: .5rem; border-bottom: 1px solid var(--black-border); }
-#articleBody h3 { font-family: var(--font-display); font-size: 1.15rem; color: var(--gold); margin: 1.5rem 0 .5rem; }
-#articleBody h4 { font-size: 1rem; color: var(--white); margin: 1.25rem 0 .4rem; font-weight: 600; }
-#articleBody p { margin: .75rem 0; color: var(--white-muted); line-height: 1.85; }
-#articleBody ul, #articleBody ol { padding-left: 1.5rem; margin: .75rem 0; }
-#articleBody li { color: var(--white-muted); margin-bottom: .35rem; line-height: 1.7; }
-#articleBody strong { color: var(--white); font-weight: 600; }
-#articleBody a { color: var(--gold); }
-#articleBody a:hover { color: var(--gold-light); }
-#articleBody blockquote { border-left: 3px solid var(--gold); padding: .75rem 1.25rem; margin: 1rem 0; background: var(--gold-muted); border-radius: 0 var(--radius) var(--radius) 0; }
-#articleBody blockquote p { color: var(--white); margin: 0; }
-#articleBody code { background: var(--black-soft); padding: .15rem .4rem; border-radius: 2px; font-family: var(--font-mono); font-size: .85em; color: var(--gold-light); }
-#articleBody pre { background: var(--black-soft); border: 1px solid var(--black-border); border-radius: var(--radius); padding: 1.25rem; overflow-x: auto; margin: 1rem 0; }
-#articleBody hr { border: none; border-top: 1px solid var(--black-border); margin: 2rem 0; }
-
-/* Plain-text rendering: detect pillar headers */
-.pillar-block { margin: 2rem 0; }
-.pillar-label { font-family: var(--font-mono); font-size: .65rem; letter-spacing: .15em; text-transform: uppercase; color: var(--gold); margin-bottom: .35rem; }
-.pillar-title { font-family: var(--font-display); font-size: 1.35rem; color: var(--white); margin-bottom: 1rem; padding-bottom: .5rem; border-bottom: 1px solid var(--black-border); }
-.focus-label { font-family: var(--font-mono); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; color: var(--white-muted); margin: 1rem 0 .5rem; }
-
-/* Attachment item */
-.attach-item { display:flex;align-items:center;gap:1rem;background:var(--black);border:1px solid var(--black-border);border-radius:var(--radius);padding:.75rem 1rem;margin-bottom:.5rem;text-decoration:none;transition:border-color .2s; }
-.attach-item:hover { border-color:var(--gold); }
-.attach-icon { font-size:1.5rem;flex-shrink:0; }
-.attach-info { flex:1;min-width:0; }
-.attach-name { font-size:.85rem;color:var(--white);font-weight:500; }
-.attach-size { font-size:.72rem;color:var(--white-muted);font-family:var(--font-mono); }
-.attach-dl { color:var(--gold);font-size:.8rem;white-space:nowrap; }
+.filter-btn {
+  background: var(--black-card); border: 1px solid var(--black-border);
+  color: var(--white-muted); padding: 0.4rem 1rem;
+  border-radius: 2px; cursor: pointer; font-size: 0.8rem;
+  font-family: var(--font-mono); letter-spacing: 0.05em;
+  transition: all var(--transition);
+}
+.filter-btn:hover, .filter-btn.active { border-color: var(--gold); color: var(--gold); background: var(--gold-muted); }
 </style>
 
 <script>
-// ── Helpers ──────────────────────────────────────────────
-function loadPosts() {
-  try {
-    const raw = localStorage.getItem('w3l_posts');
-    return raw ? JSON.parse(raw) : getDefaultPosts();
-  } catch(e) { return getDefaultPosts(); }
+const ARTICLES = [
+  {slug:'mica-2024-guide',emoji:'🇪🇺',cat:'MiCA',date:'Dec 2024',title:'MiCA 2024: The Complete Guide for Crypto Businesses Entering the EU',excerpt:'The EU\'s Markets in Crypto-Assets Regulation is the world\'s most comprehensive crypto rulebook. Here\'s everything your business needs to know.',readTime:'10 min',body:`<h2>MiCA 2024: Complete Guide</h2><p>The Markets in Crypto-Assets Regulation (MiCA) officially entered full force in December 2024, establishing the European Union as the world's most regulated — and arguably most predictable — crypto jurisdiction.</p><h3>What MiCA Covers</h3><p>MiCA creates a unified licensing regime for crypto-asset service providers (CASPs) across all 27 EU member states. The regulation covers three categories of crypto assets: asset-referenced tokens (ARTs), e-money tokens (EMTs), and "other" crypto assets (including utility tokens and most cryptocurrencies).</p><h3>Who Needs a MiCA Licence?</h3><p>Any entity providing crypto-asset services in the EU — including exchanges, custodians, portfolio managers, advisors, and transfer services — must obtain CASP authorisation from their national competent authority (NCA). The "passport" then allows operation across all EU states.</p><h3>Timeline & Compliance Costs</h3><p>Existing crypto firms operating in the EU under national regimes were granted an 18-month transition period (ending mid-2026 for most states). New entrants must apply before operating. Authorisation typically takes 3–6 months and costs between €50,000–€500,000 depending on jurisdiction and firm size.</p><h3>Key Obligations</h3><ul style="color:var(--white-muted);padding-left:1.5rem;margin:1rem 0;"><li>Whitepapers for asset issuance</li><li>Ongoing disclosure requirements</li><li>Reserve requirements for ARTs and EMTs</li><li>Strict AML/KYC under AMLD6</li><li>Consumer protection and complaint handling</li></ul><h3>How Web3Legals Can Help</h3><p>We provide end-to-end MiCA compliance services — from gap analysis and whitepaper legal review to NCA application preparation and ongoing compliance monitoring. <a href="contact.html">Contact us</a> for a MiCA readiness assessment.</p>`},
+  {slug:'uae-vara-license',emoji:'🇦🇪',cat:'UAE',date:'Nov 2024',title:'UAE VARA Crypto License: Step-by-Step Application Guide 2024',excerpt:'Everything you need to apply for a Virtual Asset Regulatory Authority licence in Dubai — requirements, costs, timelines, and pitfalls to avoid.',readTime:'8 min',body:`<h2>UAE VARA Crypto License Guide</h2><p>The UAE's Virtual Assets Regulatory Authority (VARA) has established Dubai as the Middle East's premier crypto hub. VARA licensing is rigorous but offers unmatched benefits: 0% corporate tax, world-class infrastructure, and proximity to a booming Web3 ecosystem.</p><h3>VARA Licence Categories</h3><p>VARA issues licences across seven activity types: Exchange Services, Broker-Dealer Services, Investment Management Services, Lending & Borrowing Services, Payment & Remittance Services, VA Transfer & Settlement Services, and Custody Services. Most exchanges require multiple categories.</p><h3>Application Requirements</h3><p>Applicants need a UAE entity (Free Zone or Mainland), a minimum capital (typically AED 1–4 million depending on category), a fit-and-proper assessment for directors and shareholders, a comprehensive AML/CFT programme, and detailed technology and operational documentation.</p><h3>Timeline & Costs</h3><p>The full licensing process typically takes 9–18 months. VARA application fees range from AED 100,000–500,000, with annual supervision fees layered on top. Total first-year costs for a full-service exchange commonly exceed AED 2 million.</p><h3>DIFC vs ADGM vs Mainland</h3><p>Web3 businesses can also consider the Dubai International Financial Centre (DIFC) and Abu Dhabi Global Market (ADGM) — both are financial free zones with their own regulatory frameworks. DIFC operates under the DFSA and ADGM under FSRA. Each has different capital requirements and activity permissions.</p>`},
+  {slug:'dao-legal-wrapper',emoji:'⚖️',cat:'DAO',date:'Nov 2024',title:'How to Give Your DAO a Legal Wrapper Without Killing Decentralisation',excerpt:'The definitive guide to DAO legal structures — Cayman foundations, Wyoming LLCs, Marshall Islands entities — and when to use each.',readTime:'9 min',body:`<h2>DAO Legal Structures</h2><p>Operating a DAO without a legal wrapper is increasingly untenable. Regulators are moving toward treating unincorporated DAOs as general partnerships — meaning every token holder could face unlimited personal liability for the DAO's obligations.</p><h3>Why DAOs Need Legal Wrappers</h3><p>A legal wrapper gives a DAO contractual capacity (ability to sign agreements), limited liability protection for contributors, the ability to hold IP and operate bank accounts, and a clear counterparty for regulators and courts.</p><h3>The Cayman Foundation</h3><p>The Cayman Islands Foundation Company is the gold standard for major protocol DAOs. It can be structured to be "ownerless" — no shareholders, just members and an optional supervisor. The foundation holds IP, receives protocol fees, and serves as the legal face of the DAO while the actual governance remains on-chain.</p><h3>Wyoming DAO LLC</h3><p>Wyoming became the first US state to legally recognise DAOs as LLCs in 2021. The Wyoming DAO LLC allows the LLC's operating agreement to be wholly or partly on a blockchain. Governance tokens can map directly to membership interests. Best for US-adjacent projects.</p><h3>Marshall Islands DAO LLC</h3><p>The Republic of the Marshall Islands passed the Decentralised Autonomous Organization Act in 2022, providing specific legal recognition for on-chain governance. Popular for projects seeking a jurisdiction with minimal regulatory overhead.</p>`},
+  {slug:'singapore-crypto-regulation',emoji:'🇸🇬',cat:'Singapore',date:'Oct 2024',title:'Singapore Crypto Regulation: MAS Framework & PSA 2019 Explained',excerpt:'A practical guide to operating a crypto business in Singapore — Payment Services Act, MAS licensing, and what the 2024 regulatory updates mean.',readTime:'8 min',body:`<h2>Singapore Crypto Regulation Guide</h2><p>Singapore has long been one of Asia's most welcoming jurisdictions for crypto businesses — but that welcome comes with strict compliance requirements under the Monetary Authority of Singapore (MAS).</p><h3>Payment Services Act 2019</h3><p>The Payment Services Act (PSA) 2019 is the primary legislation governing crypto businesses in Singapore. It creates three licence classes: Standard Payment Institution (SPI), Major Payment Institution (MPI), and Money-Changing Licence. Most crypto businesses require MPI status.</p><h3>Digital Payment Token Services</h3><p>Firms providing Digital Payment Token (DPT) services — including crypto exchanges, custodians, and OTC desks — must hold an MPI licence for DPT services. Requirements include S$250,000 base capital, a permanent place of business in Singapore, and fit-and-proper directors.</p><h3>2023-2024 Updates</h3><p>MAS significantly tightened crypto regulation following the TerraLUNA and FTX collapses. Key changes include mandatory retail investor risk disclosure, restrictions on DPT advertising, enhanced customer due diligence, and new custody segregation requirements effective 2024.</p><h3>Tax Treatment</h3><p>Singapore has no capital gains tax, making it attractive for crypto investors. However, crypto received as payment for services is treated as income and taxed accordingly. Mining and staking rewards may also be taxable depending on the facts.</p>`},
+  {slug:'defi-regulation-2024',emoji:'📊',cat:'DeFi',date:'Oct 2024',title:'DeFi Regulation 2024: How Regulators Are Targeting Decentralised Finance',excerpt:'A global overview of how the US SEC, EU, UK FCA, and FATF are approaching DeFi regulation — and what it means for protocol builders.',readTime:'7 min',body:`<h2>DeFi Regulation 2024</h2><p>The regulatory noose around DeFi tightened significantly in 2023-2024. Regulators in the US, EU, UK, and globally have moved from observer status to active enforcement and rulemaking.</p><h3>SEC's View: Most DeFi is Securities</h3><p>The US Securities and Exchange Commission has consistently argued that most DeFi tokens — particularly governance tokens and yield-bearing instruments — constitute securities. Several high-profile enforcement actions in 2023-2024 targeted DEXes, lending protocols, and DAO governance token issuers.</p><h3>MiCA and DeFi</h3><p>Interestingly, MiCA explicitly excludes "fully decentralised" crypto-asset services with no issuer or service provider. However, MiCA's Article 2(4) notes that truly decentralised services are rare — any protocol with an identifiable developer team, admin keys, or fee recipients likely falls within scope.</p><h3>FATF Travel Rule</h3><p>The Financial Action Task Force (FATF) Travel Rule requires VASPs to share originator and beneficiary information for crypto transfers above $1,000. Applying this to DeFi is technically complex — but regulators are increasingly requiring front-end operators and interface providers to comply.</p><h3>Practical Guidance</h3><p>DeFi protocols should conduct legal opinion exercises to assess their regulatory status, consider progressive decentralisation strategies, ensure admin key controls are documented and secured, and consult with legal counsel before deploying revenue-generating features.</p>`},
+  {slug:'nft-legal-guide',emoji:'🖼️',cat:'NFT',date:'Sep 2024',title:'NFT Legal Guide 2024: IP, Securities, Tax & Consumer Law Issues',excerpt:'The complete legal breakdown of NFTs — intellectual property rights, securities classification risk, tax treatment, and marketplace liability.',readTime:'9 min',body:`<h2>NFT Legal Guide 2024</h2><p>NFTs exist at the intersection of intellectual property law, financial regulation, consumer protection, and tax — making them one of the most legally complex assets in the digital economy.</p><h3>IP Rights: What NFT Buyers Actually Own</h3><p>Buying an NFT does not automatically transfer copyright. Unless the sales terms explicitly assign IP rights, the buyer typically receives only a limited licence — often just the right to display the image. IP assignment requires a written agreement that clearly specifies what rights transfer and under what conditions.</p><h3>Securities Risk</h3><p>The SEC has scrutinised several NFT projects as unregistered securities offerings, particularly when: (1) the project was sold as an investment, (2) there were promises of future development that would increase value, or (3) buyer profits depended on the efforts of the project team. Projects fractionalisig NFTs or offering staking yields face heightened risk.</p><h3>Tax Treatment</h3><p>In most jurisdictions, NFT gains are taxed as capital gains. Creators who mint and sell NFTs may also have income tax obligations. Royalties received from secondary sales are generally taxed as ordinary income. DAOs distributing NFT royalties to token holders create complex pass-through tax situations.</p><h3>Marketplace Liability</h3><p>NFT marketplaces can face liability for: hosting infringing content, facilitating unregistered securities offerings, violations of consumer protection laws, and GDPR/privacy issues where metadata includes personal data. Terms of service, DMCA takedown processes, and careful curation are essential risk mitigations.</p>`},
+  {slug:'crypto-tax-guide-india',emoji:'🇮🇳',cat:'Token',date:'Sep 2024',title:'Crypto Tax in India 2024: 30% VDA Tax, TDS & Updated Compliance Guide',excerpt:'India\'s Virtual Digital Asset tax regime explained — 30% flat tax, 1% TDS, no loss offset, and the implications for Indian crypto investors and exchanges.',readTime:'7 min',body:`<h2>India Crypto Tax 2024</h2><p>India's tax treatment of Virtual Digital Assets (VDAs) — the government's umbrella term for cryptocurrency and NFTs — is among the world's harshest. Introduced by the Finance Act 2022, the regime fundamentally changed the economics of crypto trading in India.</p><h3>The 30% Flat Tax</h3><p>All gains from VDA transfers are taxed at a flat 30% rate (plus applicable surcharge and cess), regardless of the holding period or the taxpayer's income slab. Unlike equity investments, VDA gains cannot benefit from long-term capital gains rates or exemptions.</p><h3>1% TDS on Transfers</h3><p>Section 194S mandates a 1% Tax Deducted at Source on VDA transfers exceeding ₹50,000 (₹10,000 for specified persons). This falls on the buyer, effectively requiring exchanges to deduct TDS from every qualifying transaction. The TDS is creditable against tax liability but creates significant cash flow friction.</p><h3>No Loss Offset</h3><p>Losses from one VDA cannot be set off against gains from another VDA — nor against any other income. If you lose ₹10 lakh on Bitcoin but gain ₹10 lakh on Ethereum, you owe 30% tax on ₹10 lakh with no relief for the Bitcoin loss. This "no offset" rule is unique to India globally.</p><h3>Gifting & Airdrops</h3><p>VDAs received as gifts above ₹50,000 from non-relatives are taxed as income at slab rates. Airdrops and staking rewards are also taxable as income on receipt.</p>`},
+  {slug:'crypto-friendly-switzerland',emoji:'🇨🇭',cat:'Token',date:'Aug 2024',title:'Switzerland\'s Crypto Valley: FINMA Framework & Why Zug Remains a Web3 Hub',excerpt:'How Switzerland became the world\'s first crypto-friendly nation and why "Crypto Valley" in Zug still attracts top blockchain projects in 2024.',readTime:'7 min',body:`<h2>Switzerland Crypto Valley Guide</h2><p>Switzerland pioneered crypto-friendly regulation when the canton of Zug began accepting Bitcoin for government services in 2016. Today, "Crypto Valley" — centred in Zug but spanning Geneva and Zurich — hosts hundreds of blockchain foundations and projects.</p><h3>FINMA's Token Framework</h3><p>The Swiss Financial Market Supervisory Authority (FINMA) issued landmark guidance in 2018 categorising tokens as payment tokens, utility tokens, or asset tokens. Payment and utility tokens generally do not require FINMA authorisation. Asset tokens — which represent claims on underlying assets — may trigger securities or collective investment scheme regulation.</p><h3>DLT Act 2021</h3><p>Switzerland's Distributed Ledger Technology Act (effective 2021) was a world-first: dedicated legislation for blockchain-based assets. It created a new "DLT trading facility" licence, introduced ledger-based securities, and clarified segregation of crypto assets in insolvency — a critical protection for custodians.</p><h3>The Swiss Foundation</h3><p>The Swiss Foundation (Stiftung) remains popular for token issuance. Foundations are not owned — they exist for a specified purpose and are governed by a foundation council. No shareholders mean no equity concerns, and the non-profit structure can align with decentralisation goals.</p><h3>Banking for Crypto</h3><p>SEBA Bank and Sygnum Bank — both FINMA-licensed — specifically serve crypto clients, offering crypto custody, trading, and banking services. This regulatory clarity and banking access distinguish Switzerland from many competing jurisdictions.</p>`},
+  {slug:'cayman-crypto-structure',emoji:'🇰🇾',cat:'Token',date:'Aug 2024',title:'Cayman Islands Crypto Structures: Foundations, Funds & Token Issuance',excerpt:'Why the Cayman Islands remains the world\'s leading jurisdiction for crypto project legal structures — foundations, exempted companies, and VC-compatible fund structures.',readTime:'8 min',body:`<h2>Cayman Islands Crypto Guide</h2><p>The Cayman Islands hosts more crypto foundations, VC funds, and token issuers than any other jurisdiction. Its combination of flexible corporate law, no direct taxes, political stability, and sophisticated professional services ecosystem make it the default choice for serious crypto projects.</p><h3>The Cayman Foundation Company</h3><p>The Foundation Companies Act (2017) introduced a structure uniquely suited to blockchain projects: a company with no shareholders, governed by a memorandum and articles that specify its purpose and governance. For DAOs, the foundation can be structured to be governed by on-chain votes, with a "Supervisor" role ensuring legal compliance without controlling operations.</p><h3>Exempted Companies</h3><p>The Cayman Exempted Company is the standard vehicle for operating entities, token issuers, and special purpose vehicles. It requires no minimum capital, can be structured with complex share classes, and benefits from a 20-year statutory tax exemption guarantee.</p><h3>Cayman VC Funds</h3><p>Most major crypto venture funds are structured as Cayman Exempted Limited Partnerships (ELPs). The ELP structure mirrors US Delaware LP terms, making it familiar to institutional LPs, while benefiting from Cayman's CIMA regulatory framework and tax neutrality.</p><h3>CIMA Regulation</h3><p>The Cayman Islands Monetary Authority (CIMA) regulates virtual asset service providers under the Virtual Asset (Service Providers) Act 2020. VASP registration is required for firms actively marketing services into the Cayman Islands but is not triggered merely by having a Cayman entity.</p>`},
+  {slug:'el-salvador-bitcoin-law',emoji:'🇸🇻',cat:'Token',date:'Jul 2024',title:'El Salvador\'s Bitcoin Law: Three Years Later — What Actually Happened?',excerpt:'El Salvador made Bitcoin legal tender in 2021. Three years on, we examine what really happened to adoption, the IMF relationship, and what crypto businesses can learn.',readTime:'6 min',body:`<h2>El Salvador Bitcoin Law: 3-Year Review</h2><p>In September 2021, El Salvador became the first country in history to adopt Bitcoin as legal tender under the Bitcoin Law. President Nayib Bukele's government rolled out the Chivo wallet, distributed $30 in Bitcoin to citizens, and pledged to mine Bitcoin with volcanic energy.</p><h3>Adoption Reality</h3><p>Three years in, adoption among Salvadorans is limited. Most citizens who received the $30 airdrop withdrew it immediately as cash. The Chivo wallet has seen low repeat usage, and most businesses accept Bitcoin only because they must — not because customers pay with it.</p><h3>IMF Tensions & 2024 Compromise</h3><p>The IMF long refused to reach a deal with El Salvador over Bitcoin concerns. In January 2024, El Salvador reached a $1.4 billion agreement with the IMF — but only after agreeing to make Bitcoin acceptance optional for businesses (reversing the mandatory acceptance clause) and remove the government's Bitcoin-related fiscal risks.</p><h3>What the Crypto Industry Learned</h3><p>The El Salvador experiment showed that top-down legal tender mandates don't drive organic adoption. It also demonstrated that small, dollarized economies face unique challenges with currency volatility. However, it created useful precedent for crypto's recognition as legitimate currency — a legal argument that has been used in other jurisdictions.</p>`},
+  {slug:'uk-fca-crypto-regulation',emoji:'🇬🇧',cat:'Token',date:'Jul 2024',title:'UK FCA Crypto Regulation 2024: Registration, Financial Promotions & What\'s Next',excerpt:'The UK Financial Conduct Authority\'s approach to crypto — from AML registration to the financial promotions regime — and what the incoming regulatory framework means.',readTime:'7 min',body:`<h2>UK FCA Crypto Regulation 2024</h2><p>The UK has moved from a wait-and-see approach to active crypto regulation, with the FCA taking an increasingly assertive stance on both registration requirements and consumer protection.</p><h3>Cryptoasset AML Registration</h3><p>Since January 2020, UK crypto businesses (including exchanges, custodians, and ICO issuers) must register with the FCA under the Money Laundering Regulations. The registration process is rigorous — the FCA has approved fewer than 50% of applications and imposed a "temporary registration" regime that created significant market uncertainty.</p><h3>Financial Promotions Regime</h3><p>From October 2023, crypto firms must comply with strict financial promotions rules when marketing to UK consumers. Promotions must be approved by an FCA-authorised firm (or the crypto firm itself if registered), must include prominent risk warnings, and are subject to FCA intervention powers if deemed harmful.</p><h3>Incoming Regulatory Framework</h3><p>The Financial Services and Markets Act 2023 empowered HM Treasury to bring crypto assets within FCA regulation as a specified investment. The FCA is currently consulting on a full regulatory framework covering trading platforms, intermediaries, and stablecoins — expected to be finalised in 2025-2026.</p>`},
+  {slug:'crypto-regulation-hong-kong',emoji:'🇭🇰',cat:'Token',date:'Jun 2024',title:'Hong Kong\'s Crypto Comeback: VASP Licensing & Retail Trading Rules',excerpt:'Hong Kong reversed course on crypto in 2023-2024, opening its doors to licensed exchanges and retail crypto trading. Here\'s the full regulatory picture.',readTime:'7 min',body:`<h2>Hong Kong Crypto Regulation 2024</h2><p>Hong Kong staged a dramatic reversal on crypto in 2023, transforming from a restrictive regime into one of Asia's most active crypto licensing hubs — a strategic move to reclaim its position as Asia's premier financial centre following the rise of Singapore.</p><h3>VASP Licensing Under AMLO</h3><p>Under the updated Anti-Money Laundering and Counter-Terrorist Financing Ordinance (AMLO), all centralised virtual asset trading platforms operating in Hong Kong — or actively marketing to Hong Kong investors — must obtain a VASP licence from the Securities and Futures Commission (SFC). The deadline for existing operators passed in March 2024.</p><h3>Retail Access</h3><p>In a major policy shift, the SFC permitted licensed exchanges to serve retail investors (previously, only professional investors were permitted). Retail-accessible exchanges face additional requirements including suitability assessments, fee disclosures, and limits on complex derivatives products.</p><h3>Stablecoins</h3><p>Hong Kong's Monetary Authority (HKMA) has separately moved to regulate fiat-backed stablecoins, with a licensing regime expected to be operational by 2024-2025. Issuers of HKD or USD-backed stablecoins targeting Hong Kong users will need HKMA authorisation.</p>`},
+  {slug:'mica-stablecoin-rules',emoji:'💶',cat:'MiCA',date:'Jun 2024',title:'MiCA Stablecoin Rules: What EUR-backed & USD-backed Issuers Must Do',excerpt:'Deep dive into MiCA\'s ART and EMT frameworks — capital requirements, reserve management, redemption rights, and what Tether and Circle face in Europe.',readTime:'8 min',body:`<h2>MiCA Stablecoin Rules</h2><p>MiCA's most immediately impactful provisions relate to stablecoins — creating strict rules for both asset-referenced tokens (ARTs) and e-money tokens (EMTs). These rules came into force in June 2024, six months ahead of the full CASP licensing framework.</p><h3>ARTs vs EMTs</h3><p>MiCA distinguishes between tokens that reference multiple assets or non-fiat assets (ARTs — think algorithmic stablecoins or basket-backed tokens) and tokens that reference a single fiat currency (EMTs — think USDC or EURT). EMTs are treated more like e-money and face stricter rules; significant ARTs face additional macro-prudential oversight.</p><h3>Reserve Requirements</h3><p>ART issuers must maintain a reserve of assets at least equal to the circulating supply, held in segregated accounts with authorised custodians. The reserve must include at least 30% in deposits at credit institutions. EMT issuers must hold 100% reserves in deposits or government bonds.</p><h3>Tether's EU Challenge</h3><p>USDT — the world's largest stablecoin — faced delistings from EU-licensed exchanges in Q4 2024 after Tether declined to seek EU authorisation under MiCA. This created significant market disruption and highlighted the tension between decentralised/offshore issuers and the EU's territorial regulatory approach.</p>`},
+  {slug:'defi-aml-compliance',emoji:'🔍',cat:'DeFi',date:'May 2024',title:'DeFi AML Compliance: How to Implement the FATF Travel Rule On-Chain',excerpt:'Practical guide to Anti-Money Laundering compliance for DeFi protocols — Travel Rule, on-chain KYC solutions, Chainalysis integration, and regulatory safe harbours.',readTime:'8 min',body:`<h2>DeFi AML Compliance Guide</h2><p>Anti-Money Laundering compliance for DeFi is technically complex but increasingly unavoidable. This guide covers practical implementation strategies for protocols that want to maintain compliance without sacrificing the user experience that makes DeFi valuable.</p><h3>The Travel Rule Problem</h3><p>The FATF Travel Rule requires VASPs to pass originator and beneficiary information for transfers above $1,000. For centralised exchanges, this is manageable. For DeFi — where transactions are pseudonymous and permissionless — it creates a fundamental tension between compliance and decentralisation.</p><h3>Practical Compliance Approaches</h3><p>Front-end KYC gates allow protocols to maintain permissionless smart contracts while gating the official front-end interface. This is the approach taken by Uniswap and others: the contracts are open, but the official interface requires users to pass sanctions screening and, in some jurisdictions, identity verification.</p><h3>On-Chain KYC Solutions</h3><p>Projects like Polygon ID, Worldcoin, and various SBT (Soulbound Token) implementations offer privacy-preserving identity proofs that can satisfy regulatory KYC requirements without fully doxxing users. Zero-knowledge proofs allow users to prove nationality, age, or non-sanctions status without revealing their full identity.</p>`},
+  {slug:'crypto-regulation-europe-2024',emoji:'🏛️',cat:'MiCA',date:'May 2024',title:'European Crypto Regulation Timeline 2024-2026: What\'s Coming Next',excerpt:'Beyond MiCA — the EU regulatory pipeline for crypto includes TFR, DORA, AI Act interactions, and pending amendments. Full timeline for compliance teams.',readTime:'7 min',body:`<h2>EU Crypto Regulation 2024-2026</h2><p>MiCA is only the beginning. The EU's regulatory pipeline includes a series of overlapping measures that crypto businesses must plan for over the next 24 months.</p><h3>Transfer of Funds Regulation (TFR)</h3><p>The updated TFR, which entered force alongside MiCA, extends the FATF Travel Rule to all crypto transfers — including transfers to unhosted wallets above €1,000. CASPs must collect originator/beneficiary information and undertake risk assessments for unhosted wallet transfers. This creates significant operational complexity for exchanges serving retail users.</p><h3>Digital Operational Resilience Act (DORA)</h3><p>DORA applies to financial entities including MiCA-licensed CASPs from January 2025. It mandates ICT risk management frameworks, incident reporting, digital resilience testing, and third-party ICT risk management. CASPs using cloud providers or third-party custody solutions will need to ensure DORA-compliant contractual arrangements.</p><h3>AML Package 2025</h3><p>A new EU AML Authority (AMLA) will be established by 2025, with direct supervisory powers over the highest-risk CASPs (those operating in 6+ member states). AMLA will publish binding regulatory technical standards for crypto AML — creating an additional layer above national competent authorities.</p>`},
+  {slug:'token-issuance-legal-guide',emoji:'🪙',cat:'Token',date:'Apr 2024',title:'Token Issuance Legal Checklist 2024: Everything Before You Launch',excerpt:'The definitive legal checklist for token launches — jurisdiction selection, legal opinion, whitepaper, investor documentation, exchange listings, and post-launch obligations.',readTime:'10 min',body:`<h2>Token Issuance Legal Checklist</h2><p>Launching a token without legal preparation is one of the most common — and costly — mistakes in Web3. This checklist covers the essential legal steps before, during, and after your token launch.</p><h3>Pre-Launch: Jurisdiction & Structure</h3><p>Step 1 is jurisdiction selection: where will the token issuer be incorporated, and which jurisdictions will you actively market to? These are different questions. Common issuer jurisdictions include Cayman (foundation), BVI, Switzerland (foundation), and Singapore. You should explicitly exclude high-risk jurisdictions (US, unless compliant) from your marketing and terms.</p><h3>Legal Opinion on Token Classification</h3><p>Get a written legal opinion on your token's classification in at least your primary operating jurisdictions. The key question: is this a security? If yes, you need to either register or qualify for an exemption (Reg D, Reg S, small offering exemptions). If utility, document the reasoning carefully — enforcement agencies will scrutinise it.</p><h3>Whitepaper Legal Review</h3><p>Your whitepaper is a marketing document with potential securities law implications. Legal review should cover: forward-looking statements, profit expectations, risk disclosures, jurisdictional restrictions, and disclaimers. The whitepaper should not describe the token as an "investment" or project specific returns.</p><h3>Investor Documentation</h3><p>For pre-sale rounds, use SAFT (Simple Agreement for Future Tokens) for US investors under Reg D, or jurisdiction-specific equivalents elsewhere. Ensure all investors are accredited (for securities offerings) and that KYC/AML is conducted. Keep investor records meticulously — you'll need them if regulators come asking.</p>`},
+  {slug:'crypto-regulation-bahrain',emoji:'🇧🇭',cat:'Token',date:'Apr 2024',title:'Bahrain Crypto Regulation: CBB Framework & Why Gulf Founders Choose Manama',excerpt:'Bahrain\'s Central Bank crypto regulatory framework explained — licensing categories, capital requirements, and why Bahrain is emerging as a GCC crypto hub.',readTime:'6 min',body:`<h2>Bahrain Crypto Regulation</h2><p>Bahrain has quietly built one of the Middle East's most sophisticated crypto regulatory frameworks, often overlooked in favour of Dubai but increasingly attractive to founders seeking a regulated GCC base with lower costs.</p><h3>CBB Crypto-Asset Module</h3><p>Bahrain's Central Bank (CBB) regulates crypto businesses through its Crypto-Asset Module (CRA), which sits within the CBB Rulebook. The CRA creates a licensing framework for crypto-asset exchanges and custodians, with requirements covering capital adequacy, AML/CFT, technology risk, and governance.</p><h3>Licensing Categories</h3><p>The CBB issues Crypto-Asset Module licences in two categories: Category 1 (exchanges and platforms facilitating trading) and Category 2 (non-trading services including custody, advisory, and portfolio management). Capital requirements range from BD 25,000–300,000 (approximately $66,000–$800,000).</p><h3>Key Advantages</h3><p>Bahrain's advantages include: a regulatory "sandbox" allowing testing without full licensing, a relatively streamlined application process (3-6 months vs 12-18 months in UAE), lower costs than Dubai (office space, personnel), and a strategic location for accessing Saudi Arabia and wider GCC markets.</p>`},
+  {slug:'smart-contract-legal-risks',emoji:'📜',cat:'DeFi',date:'Mar 2024',title:'Smart Contract Legal Risks: Who Is Liable When Code Fails?',excerpt:'Analysing liability in DeFi: when smart contracts malfunction, get exploited, or perform unexpectedly — who bears legal responsibility and how to mitigate it.',readTime:'8 min',body:`<h2>Smart Contract Legal Liability</h2><p>Smart contracts are "trustless" — but they're not liability-free. When code executes unexpectedly, whether through bugs, exploits, or changing external conditions, the question of legal liability arises. The answer depends on the structure of the protocol, jurisdiction, and the nature of the failure.</p><h3>Developer Liability</h3><p>In common law jurisdictions, software developers can face liability in contract (if they made express warranties about functionality), tort/negligence (if they failed to exercise reasonable care), or under consumer protection laws. Open-source developers who contributed to a protocol can argue they owe no duty of care to end users — but this defence is weakening as courts examine economic reality over legal form.</p><h3>Auditor Liability</h3><p>Smart contract auditors face potential liability if their audit opinions are relied upon by investors who later suffer losses from vulnerabilities the audit missed. Careful audit report drafting — clearly scoping what was reviewed, what was excluded, and what the opinion covers — is essential risk management for audit firms.</p><h3>DAO Governance Liability</h3><p>DAO governance token holders who vote for protocol upgrades or parameter changes that cause losses could face partnership liability in unincorporated DAOs. This is a key driver of DAO legal wrapping — properly structured DAOs can insulate members from this risk through limited liability entities.</p><h3>Best Practices for Protocol Developers</h3><p>Legal risk mitigation for protocol developers includes: (1) comprehensive audits by reputable firms, (2) bug bounty programmes, (3) legal entity wrappers for the development team, (4) clearly drafted terms of use that disclaim warranties, and (5) insurance — either through traditional professional indemnity or DeFi-native insurance protocols.</p>`},
+  {slug:'crypto-employment-web3',emoji:'👥',cat:'DAO',date:'Mar 2024',title:'Crypto Employment Law: How to Pay Employees in Tokens Legally',excerpt:'Legal framework for token-based compensation: vesting schedules, tax implications, employment law compliance, and how leading Web3 companies structure employee token grants.',readTime:'7 min',body:`<h2>Crypto Employment & Token Compensation</h2><p>Web3 companies routinely compensate contributors with tokens — but doing so legally requires careful attention to employment law, securities regulations, and tax obligations across multiple jurisdictions.</p><h3>Employee vs. Contractor</h3><p>The employment vs. independent contractor distinction is crucial in Web3. Many projects work with global, pseudonymous contributors who resist formal employment relationships. Misclassifying employees as contractors creates significant legal exposure — particularly in the EU, UK, and California where worker protections are robust and enforcement is increasing.</p><h3>Token Vesting: Legal Structure</h3><p>Token vesting agreements should be governed by clear contractual terms specifying the vesting schedule, cliff periods, acceleration triggers, and tax treatment. A common structure is a 4-year vest with a 1-year cliff. Tax arises differently depending on whether the tokens are treated as employment income, capital, or a separate asset class in the relevant jurisdiction.</p><h3>Securities Law Concerns</h3><p>Issuing tokens to employees as compensation may constitute a securities offering in some jurisdictions — triggering registration requirements or the need for exemptions. US companies should consider Rule 701 exemptions for employee equity compensation; other jurisdictions have analogous frameworks.</p><h3>Practical Implementation</h3><p>Best practices include: written agreements for all contributor relationships, clear vesting contracts with legal review, tax withholding or reporting obligations depending on jurisdiction, and dedicated token management platforms (Hedgey Finance, Vesting.team) for on-chain vesting enforcement.</p>`},
+  {slug:'nft-marketplace-compliance',emoji:'🛒',cat:'NFT',date:'Feb 2024',title:'NFT Marketplace Compliance Guide: T&Cs, KYC, IP & Tax Reporting',excerpt:'How to run a legally compliant NFT marketplace — terms of service, intellectual property policies, AML obligations, royalty enforcement, and tax reporting requirements.',readTime:'8 min',body:`<h2>NFT Marketplace Compliance</h2><p>Running an NFT marketplace requires navigating a complex intersection of IP law, securities regulation, AML obligations, consumer protection, and tax reporting. This guide covers the key compliance requirements for marketplace operators.</p><h3>Terms of Service & IP Policy</h3><p>Your platform T&Cs should clearly: (1) specify what IP rights transfer on NFT sale (typically a licence, not assignment), (2) establish your DMCA/takedown process for infringing content, (3) disclaim warranties about NFT value or future performance, and (4) set out prohibited content categories. Courts have been sympathetic to marketplace "safe harbour" defences where operators have robust T&Cs and active content moderation.</p><h3>AML Obligations</h3><p>FinCEN (US), HMRC (UK), and EU member state AML authorities have increasingly taken the view that high-value NFT platforms are art market participants subject to AML rules. Platforms with transaction volumes above certain thresholds may need to implement KYC, suspicious transaction monitoring, and file Suspicious Activity Reports (SARs).</p><h3>Royalty Enforcement</h3><p>The shift to optional royalties by major marketplaces in 2022-2023 created legal uncertainty. Smart contract-enforced royalties through EIP-2981 or similar standards provide stronger legal footing than marketplace-level enforcement. Royalty agreements embedded in NFT terms can be contractually binding on secondary buyers who agree to the platform's T&Cs.</p>`},
+  {slug:'crypto-inheritance-estate',emoji:'🔑',cat:'Token',date:'Feb 2024',title:'Crypto Inheritance Planning: How to Pass Digital Assets to Your Heirs',excerpt:'Legal frameworks for crypto estate planning — multi-sig setups, dead man switches, trusts, and how to ensure your heirs can actually access your assets.',readTime:'6 min',body:`<h2>Crypto Inheritance & Estate Planning</h2><p>An estimated $100 billion in crypto assets are permanently inaccessible due to lost private keys. For those who plan to pass crypto to heirs, the challenge is ensuring access without compromising current security.</p><h3>The Core Problem</h3><p>Traditional estate planning assumes assets can be identified and transferred by executors. Crypto changes this: without private keys or seed phrases, assets are permanently lost. But leaving keys in a will creates security risks before death. The solution requires a careful balance between access and security.</p><h3>Multi-Sig Estate Structures</h3><p>A 2-of-3 multisig wallet — where keys are distributed between the owner, a trusted family member, and a professional custodian or lawyer — can resolve the dilemma. During life, the owner controls 2 keys. On death, the remaining two keyholders can access the funds. Legal documentation should specify the conditions under which the survivor keys can be exercised.</p><h3>Crypto Estate Trust</h3><p>A properly drafted trust can hold crypto assets with a professional trustee. The trust document specifies distribution instructions, the trustee has a fiduciary obligation to follow them, and the legal entity provides a clear framework for probate courts unfamiliar with crypto. Jurisdictions like Wyoming, Nevada, and Liechtenstein have specific provisions for digital asset trusts.</p>`}
+];
+
+// Store default posts if none exist
+if (!localStorage.getItem('w3l_posts')) {
+  localStorage.setItem('w3l_posts', JSON.stringify(ARTICLES));
 }
 
-function getDefaultPosts() {
-  return [
-    { id:'1', slug:'mica-regulation-guide', emoji:'🇪🇺', category:'MiCA', date: new Date().toISOString(), title:'MiCA 2024: Complete Guide for Crypto Businesses Entering the EU', excerpt:'Everything you need to know about Markets in Crypto-Assets Regulation — licensing, compliance timelines, and what it means for your business.', content:'<p>MiCA brings a unified regulatory framework for crypto assets across the EU. This comprehensive guide covers everything your business needs to know...</p>', status:'Published', readTime:'8 min read', authorId:'admin', tags:['MiCA','EU','Regulation'], seo:{} },
-    { id:'2', slug:'uae-vara-crypto-license', emoji:'🇦🇪', category:'UAE', date: new Date(Date.now()-86400000).toISOString(), title:'UAE VARA Crypto License: Step-by-Step Application Guide', excerpt:'How to obtain a Virtual Asset Regulatory Authority license in Dubai — requirements, costs, timelines, and ongoing obligations.', content:'<p>The UAE VARA framework provides a clear pathway for crypto businesses seeking to operate in one of the world\'s most crypto-friendly jurisdictions...</p>', status:'Published', readTime:'6 min read', authorId:'admin', tags:['UAE','VARA','Licensing'], seo:{} },
-    { id:'3', slug:'dao-legal-wrapper', emoji:'⚖️', category:'DAO Law', date: new Date(Date.now()-172800000).toISOString(), title:'How to Give Your DAO a Legal Wrapper Without Killing Decentralisation', excerpt:'Practical frameworks for wrapping DAOs with legal entities while preserving on-chain governance and community ownership.', content:'<p>DAO legal wrappers protect contributors while preserving decentralisation. Here are the most effective structures available today...</p>', status:'Published', readTime:'7 min read', authorId:'admin', tags:['DAO','Legal','Structure'], seo:{} }
-  ];
-}
+let currentFilter = 'All';
 
-function fmtDate(d) {
-  if (!d) return '';
-  try {
-    return new Date(d).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
-  } catch(e) { return ''; }
-}
-
-function fmtSize(b) {
-  if (!b) return '';
-  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
-  return (b/1048576).toFixed(1) + ' MB';
-}
-
-function fileIcon(name) {
-  const ext = (name||'').split('.').pop().toLowerCase();
-  const m = { pdf:'📄', doc:'📝', docx:'📝', xls:'📊', xlsx:'📊', ppt:'📋', pptx:'📋', zip:'🗜️' };
-  return m[ext] || '📁';
-}
-
-function escHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s || '';
-  return d.innerHTML;
-}
-
-// ── State ─────────────────────────────────────────────────
-let allPosts = [];
-let visibleCount = 9;
-const PAGE_SIZE = 9;
-let currentPost = null;
-
-// ── Init ──────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  allPosts = loadPosts().filter(p => p.status === 'Published');
-
-  // Sort newest first by default
-  allPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-  // Populate category filter
-  const cats = [...new Set(allPosts.map(p => p.category).filter(Boolean))];
-  const sel = document.getElementById('categoryFilter');
-  cats.forEach(c => {
-    const o = document.createElement('option');
-    o.value = c; o.textContent = c;
-    sel.appendChild(o);
-  });
-
-  renderPosts();
-
-  // Close modal on backdrop click
-  document.getElementById('articleModal').addEventListener('click', function(e) {
-    if (e.target === this) closeArticle();
-  });
-
-  // Close on ESC
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeArticle();
-  });
-
-  // Check hash for direct post link
-  if (window.location.hash) {
-    const slug = window.location.hash.slice(1);
-    const post = allPosts.find(p => p.slug === slug);
-    if (post) openArticle(post);
-  }
-});
-
-// ── Filter & Render ───────────────────────────────────────
-function filterPosts() {
-  visibleCount = PAGE_SIZE;
-  renderPosts();
-}
-
-function getFiltered() {
-  const search = (document.getElementById('searchInput').value || '').toLowerCase();
-  const cat = document.getElementById('categoryFilter').value;
-  const sort = document.getElementById('sortFilter').value;
-
-  let posts = allPosts.filter(p => {
-    const matchSearch = !search ||
-      (p.title || '').toLowerCase().includes(search) ||
-      (p.excerpt || '').toLowerCase().includes(search) ||
-      (p.tags || []).some(t => t.toLowerCase().includes(search));
-    const matchCat = !cat || p.category === cat;
-    return matchSearch && matchCat;
-  });
-
-  if (sort === 'oldest') posts = [...posts].reverse();
-  return posts;
-}
-
-function renderPosts() {
-  const posts = getFiltered();
+function renderBlog(filter) {
   const grid = document.getElementById('blogGrid');
-  const empty = document.getElementById('blogEmpty');
-  const loadWrap = document.getElementById('loadMoreWrap');
+  const allPosts = JSON.parse(localStorage.getItem('w3l_posts') || '[]');
+  const filtered = filter === 'All' ? allPosts : allPosts.filter(p => p.cat === filter);
 
-  if (!posts.length) {
+  if (!filtered.length) {
     grid.innerHTML = '';
-    empty.style.display = 'block';
-    loadWrap.style.display = 'none';
+    document.getElementById('noResults').style.display = 'block';
     return;
   }
-
-  empty.style.display = 'none';
-  const visible = posts.slice(0, visibleCount);
-
-  grid.innerHTML = visible.map(p => {
-    const tags = (p.tags || []).slice(0, 3).map(t =>
-      `<span class="tag tag-gold">${escHtml(t)}</span>`).join('');
-    return `
-    <article class="article-card fade-in" onclick="openArticle(${JSON.stringify(JSON.stringify(p))})" style="cursor:pointer;">
+  document.getElementById('noResults').style.display = 'none';
+  grid.innerHTML = filtered.map(p => `
+    <article class="article-card fade-in">
       <div class="article-card-img">${p.emoji || '📝'}</div>
       <div class="article-card-body">
         <div class="article-meta">
-          <span class="tag tag-gold">${escHtml(p.category || 'General')}</span>
-          <span>${fmtDate(p.date)}</span>
+          <span class="tag tag-gold">${p.cat}</span>
+          <span>${p.date}</span>
+          <span>${p.readTime}</span>
         </div>
-        <h3>${escHtml(p.title)}</h3>
-        <p>${escHtml((p.excerpt || '').slice(0, 140))}${(p.excerpt||'').length > 140 ? '…' : ''}</p>
-        ${tags ? `<div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.75rem;">${tags}</div>` : ''}
+        <h3><a href="#${p.slug}" onclick="openArticle('${p.slug}');return false;">${p.title}</a></h3>
+        <p>${p.excerpt}</p>
         <div class="article-card-footer">
-          <span style="font-size:.8rem;color:var(--white-muted);">${p.readTime || '5 min read'}</span>
-          <span style="font-size:.85rem;color:var(--gold);">Read →</span>
+          <span style="font-size:0.8rem;color:var(--white-muted);">By Rahul Pareek</span>
+          <a href="#${p.slug}" onclick="openArticle('${p.slug}');return false;" style="font-size:0.85rem;">Read →</a>
         </div>
       </div>
-    </article>`;
-  }).join('');
+    </article>`).join('');
 
-  // Re-run fade-in
   document.querySelectorAll('.fade-in').forEach(el => {
-    const obs = new IntersectionObserver(e => {
-      if (e[0].isIntersecting) { el.classList.add('visible'); obs.unobserve(el); }
-    }, { threshold: 0.1 });
+    const obs = new IntersectionObserver(e => { if(e[0].isIntersecting){el.classList.add('visible');obs.unobserve(el);} },{threshold:0.1});
     obs.observe(el);
   });
-
-  loadWrap.style.display = posts.length > visibleCount ? 'block' : 'none';
 }
 
-function loadMore() {
-  visibleCount += PAGE_SIZE;
-  renderPosts();
-}
-
-// ── Article Modal ─────────────────────────────────────────
-function openArticle(postOrJson) {
-  // Accept either a post object or a JSON string (from inline onclick)
-  const post = typeof postOrJson === 'string' ? JSON.parse(postOrJson) : postOrJson;
-  currentPost = post;
-
-  // Update URL hash
-  history.pushState(null, '', '#' + (post.slug || post.id));
-
-  // Hero
-  document.getElementById('articleHero').textContent = post.emoji || '📝';
-
-  // Meta
-  document.getElementById('articleCategory').textContent = post.category || 'General';
-  document.getElementById('articleDate').textContent = fmtDate(post.date);
-  document.getElementById('articleReadTime').textContent = post.readTime || '';
-
-  // Author
-  const authorEl = document.getElementById('articleAuthor');
-  if (post.authorId) {
-    try {
-      const users = JSON.parse(localStorage.getItem('w3l_users') || '[]');
-      const author = users.find(u => u.id === post.authorId);
-      authorEl.textContent = author ? '· By ' + author.name : '· By Rahul Pareek';
-    } catch(e) { authorEl.textContent = '· By Rahul Pareek'; }
-  } else {
-    authorEl.textContent = '· By Rahul Pareek';
-  }
-
-  // Title & excerpt
-  document.getElementById('articleTitle').textContent = post.title || '';
-  const excerptEl = document.getElementById('articleExcerpt');
-  if (post.excerpt) {
-    excerptEl.textContent = post.excerpt;
-    excerptEl.style.display = 'block';
-  } else {
-    excerptEl.style.display = 'none';
-  }
-
-  // Tags
-  const tagsEl = document.getElementById('articleTags');
-  tagsEl.innerHTML = (post.tags || []).map(t =>
-    `<span class="tag tag-gold">${escHtml(t)}</span>`).join('');
-
-  // Body — render HTML content
-  const bodyEl = document.getElementById('articleBody');
-  const content = post.content || '';
-
-  if (content.trim().startsWith('<')) {
-    // Already HTML from RTE
-    bodyEl.innerHTML = content;
-  } else {
-    // Plain text — convert to formatted HTML
-    bodyEl.innerHTML = renderPlainText(content);
-  }
-
-  // Featured image
-  const featEl = document.getElementById('articleFeaturedImg');
-  if (post.featuredImg) {
-    featEl.innerHTML = `<img src="${post.featuredImg}" alt="${escHtml(post.featuredImgAlt || post.title)}" style="width:100%;border-radius:var(--radius-lg);margin:1rem 0;">`;
-  } else {
-    featEl.innerHTML = '';
-  }
-
-  // Attachments
-  const attEl = document.getElementById('articleAttachments');
-  if (post.attachments && post.attachments.length) {
-    attEl.innerHTML = `
-      <h4 style="font-size:.8rem;font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem;">Downloads</h4>
-      ${post.attachments.map(a => `
-        <a href="${a.data}" download="${escHtml(a.name)}" class="attach-item">
-          <span class="attach-icon">${fileIcon(a.name)}</span>
-          <div class="attach-info">
-            <div class="attach-name">${escHtml(a.name)}</div>
-            <div class="attach-size">${fmtSize(a.size)}</div>
-          </div>
-          <span class="attach-dl">⬇ Download</span>
-        </a>`).join('')}`;
-  } else {
-    attEl.innerHTML = '';
-  }
-
-  // Show modal
+function openArticle(slug) {
+  const posts = JSON.parse(localStorage.getItem('w3l_posts') || '[]');
+  const p = posts.find(a => a.slug === slug);
+  if (!p) return;
+  document.getElementById('articleContent').innerHTML = `
+    <div class="article-meta" style="margin-bottom:1.5rem;">
+      <span class="tag tag-gold">${p.cat}</span>
+      <span style="color:var(--white-muted);font-size:0.85rem;margin-left:0.5rem;">${p.date} · ${p.readTime} · By Rahul Pareek</span>
+    </div>
+    ${p.body || '<p>Full article content coming soon.</p>'}
+    <div style="margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--black-border);">
+      <p style="margin-bottom:1rem;">Need legal advice on this topic?</p>
+      <a href="contact.html" class="btn btn-gold">Book a Free Consultation</a>
+    </div>`;
   document.getElementById('articleModal').style.display = 'block';
   document.body.style.overflow = 'hidden';
-  // Scroll modal to top
-  document.getElementById('articleModal').scrollTop = 0;
 }
 
-function closeArticle() {
+function closeModal() {
   document.getElementById('articleModal').style.display = 'none';
   document.body.style.overflow = '';
-  history.pushState(null, '', window.location.pathname);
-  currentPost = null;
 }
 
-// ── Plain Text → HTML Renderer ────────────────────────────
-function renderPlainText(text) {
-  if (!text) return '';
-  const lines = text.split('\n');
-  let html = '';
-  let inList = false;
-
-  lines.forEach(raw => {
-    const line = raw.trim();
-
-    // Empty line
-    if (!line) {
-      if (inList) { html += '</ul>'; inList = false; }
-      return;
-    }
-
-    // PILLAR XX heading pattern
-    if (/^PILLAR\s+0?\d+\s*[—-]/i.test(line)) {
-      if (inList) { html += '</ul>'; inList = false; }
-      const parts = line.split(/\s*[—-]\s*/);
-      const num = parts[0].trim();
-      const title = parts.slice(1).join(' — ').trim();
-      html += `<div class="pillar-block"><div class="pillar-label">${escHtml(num)}</div><div class="pillar-title">${escHtml(title)}</div></div>`;
-      return;
-    }
-
-    // KEY FOCUS AREAS
-    if (/^KEY FOCUS AREAS/i.test(line)) {
-      if (inList) { html += '</ul>'; inList = false; }
-      html += `<div class="focus-label">Key Focus Areas</div>`;
-      return;
-    }
-
-    // Bullet point
-    if (line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) {
-      const item = line.replace(/^[•\-*]\s*/, '');
-      if (!inList) { html += '<ul style="list-style:none;padding:0;margin:.5rem 0;">'; inList = true; }
-      html += `<li style="display:flex;gap:.5rem;align-items:flex-start;margin-bottom:.35rem;"><span style="color:var(--gold);flex-shrink:0;">›</span><span>${escHtml(item)}</span></li>`;
-      return;
-    }
-
-    // Close list before paragraph
-    if (inList) { html += '</ul>'; inList = false; }
-
-    // All-caps short line = subheading
-    if (line === line.toUpperCase() && line.length < 80 && line.length > 3 && !/^\d/.test(line)) {
-      html += `<h3 style="font-family:var(--font-display);font-size:1.05rem;color:var(--gold);margin:1.5rem 0 .5rem;">${escHtml(line)}</h3>`;
-      return;
-    }
-
-    // Regular paragraph
-    html += `<p>${escHtml(line)}</p>`;
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.cat;
+    renderBlog(currentFilter);
   });
+});
 
-  if (inList) html += '</ul>';
-  return html;
+// Handle hash links
+if (window.location.hash) {
+  const slug = window.location.hash.substring(1);
+  setTimeout(() => openArticle(slug), 500);
 }
-</script>
 
-</main>
+document.addEventListener('DOMContentLoaded', () => renderBlog('All'));
+document.getElementById('articleModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
 </body>
 </html>
