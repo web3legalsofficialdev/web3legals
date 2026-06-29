@@ -1668,7 +1668,7 @@ function editPage(id) {
   switchToFirstTab('ed');
 }
 
-function savePost() {
+async function savePost() {
   // Handles both posts and pages depending on editingPage
   const title = document.getElementById('edTitle').value.trim();
   if (!title) { showToast('Title is required', 'error'); return; }
@@ -1961,7 +1961,7 @@ async function renderMedia() {
     </div>`).join('');
 }
 
-function handleMediaUpload(files) {
+async function handleMediaUpload(files) {
   const media = load(STORAGE.media) || [];
   let count = 0;
   Array.from(files).forEach(file => {
@@ -2117,7 +2117,7 @@ function previewAuthorPhoto(input) {
   reader.readAsDataURL(file);
 }
 
-function saveAuthor() {
+async function saveAuthor() {
   const name = document.getElementById('authorName').value.trim();
   const email = document.getElementById('authorEmail').value.trim().toLowerCase();
   const password = document.getElementById('authorPassword').value;
@@ -2211,7 +2211,7 @@ function previewProfilePhoto(input) {
   reader.readAsDataURL(file);
 }
 
-function saveProfile() {
+async function saveProfile() {
   let users = initUsers();
   const idx = users.findIndex(u => u.id === currentUser.id);
   if (idx === -1) return;
@@ -2236,7 +2236,7 @@ function saveProfile() {
 
 function showChangePassModal() { openModal('changePassModal'); }
 
-function savePasswordFromModal() {
+async function savePasswordFromModal() {
   const current = document.getElementById('cpCurrent').value;
   const newPass = document.getElementById('cpNew').value;
   const confirm = document.getElementById('cpConfirm').value;
@@ -2332,7 +2332,7 @@ function saveApiSecrets() {
   showToast('Secrets saved ✓', 'success');
 }
 
-function changePassword() {
+async function changePassword() {
   if (!isAdmin()) return;
   const current = getVal('pwCurrent');
   const newPass = getVal('pwNew');
