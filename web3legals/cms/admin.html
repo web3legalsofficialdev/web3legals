@@ -2234,6 +2234,42 @@ document.addEventListener('DOMContentLoaded', () => {
   // RTE focus to update read time
   const rteBody = document.getElementById('rteBody');
   if (rteBody) rteBody.addEventListener('input', updateReadTime);
+
+  // ─── RTE PASTE FIX ───────────────────────────────────────
+  // When a user pastes HTML source code (<h2>...</h2>) as plain
+  // text into a contenteditable div, the browser escapes every
+  // < and > to &lt; and &gt;. rteBody.innerHTML then stores the
+  // escaped version, and the blog renders raw tag text instead
+  // of formatted HTML.
+  //
+  // Fix: intercept the paste event. If the clipboard text looks
+  // like HTML (contains < tags), insert it with execCommand
+  // insertHTML so the browser parses and renders it correctly.
+  // Plain-text pastes (no < characters) pass through unchanged.
+  if (rteBody) {
+    rteBody.addEventListener('paste', function(e) {
+      // Get plain text from clipboard
+      const plain = (e.clipboardData || window.clipboardData).getData('text/plain');
+      // Get rich HTML from clipboard (from Word, browser copy etc.)
+      const richHtml = (e.clipboardData || window.clipboardData).getData('text/html');
+
+      // If the clipboard has rich HTML (copied from a browser/doc), use it directly
+      if (richHtml && richHtml.trim()) {
+        e.preventDefault();
+        document.execCommand('insertHTML', false, richHtml);
+        return;
+      }
+
+      // If plain text contains HTML tags, insert as HTML not as text
+      if (plain && /<[a-zA-Z][^>]*>/.test(plain)) {
+        e.preventDefault();
+        document.execCommand('insertHTML', false, plain);
+        return;
+      }
+
+      // Otherwise: normal plain-text paste — let the browser handle it
+    });
+  }
 });
 </script>
 </body>
