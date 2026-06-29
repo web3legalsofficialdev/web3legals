@@ -68,17 +68,71 @@
   transition: all var(--transition);
 }
 .filter-btn:hover, .filter-btn.active { border-color: var(--gold); color: var(--gold); background: var(--gold-muted); }
-#articleBody h2 { font-family: var(--font-display); font-size: 1.4rem; color: var(--white); margin: 1.75rem 0 .75rem; padding-bottom: .5rem; border-bottom: 1px solid var(--black-border); }
-#articleBody h3 { font-family: var(--font-display); font-size: 1.1rem; color: var(--gold); margin: 1.25rem 0 .5rem; }
-#articleBody h4 { font-size: 1rem; color: var(--white); margin: 1rem 0 .35rem; font-weight: 600; }
-#articleBody p { margin: .65rem 0; color: var(--white-muted); line-height: 1.85; }
-#articleBody ul, #articleBody ol { padding-left: 1.5rem; margin: .75rem 0; color: var(--white-muted); }
-#articleBody li { margin-bottom: .35rem; line-height: 1.7; }
+/* ── Article Body Typography & Spacing ── */
+#articleBody { font-size: .95rem; line-height: 1.85; color: var(--white-muted); }
+
+/* Headings */
+#articleBody h2 {
+  font-family: var(--font-display); font-size: 1.45rem; color: var(--white);
+  margin: 2.75rem 0 .85rem; padding-bottom: .6rem;
+  border-bottom: 1px solid var(--black-border); line-height: 1.3;
+}
+#articleBody h2:first-child { margin-top: .25rem; }
+#articleBody h3 {
+  font-family: var(--font-display); font-size: 1.05rem; color: var(--gold);
+  margin: 2rem 0 .5rem; line-height: 1.4;
+}
+#articleBody h4 {
+  font-size: .95rem; color: var(--white); font-weight: 600;
+  margin: 1.5rem 0 .4rem;
+}
+
+/* Paragraphs */
+#articleBody p { margin: 0 0 1rem; color: var(--white-muted); line-height: 1.9; }
+#articleBody p:last-child { margin-bottom: 0; }
+
+/* Lists */
+#articleBody ul, #articleBody ol {
+  padding-left: 1.6rem; margin: .25rem 0 1.25rem; color: var(--white-muted);
+}
+#articleBody li { margin-bottom: .5rem; line-height: 1.75; padding-left: .25rem; }
+#articleBody li:last-child { margin-bottom: 0; }
+
+/* Inline */
 #articleBody strong { color: var(--white); font-weight: 600; }
-#articleBody a { color: var(--gold); }
-#articleBody a:hover { color: var(--gold-light); }
-#articleBody blockquote { border-left: 3px solid var(--gold); padding: .75rem 1.25rem; margin: 1rem 0; background: var(--gold-muted); border-radius: 0 var(--radius) var(--radius) 0; }
-#articleBody blockquote p { color: var(--white); margin: 0; }
+#articleBody em { color: var(--white-muted); font-style: italic; }
+#articleBody a { color: var(--gold); text-decoration: none; }
+#articleBody a:hover { color: var(--gold-light); text-decoration: underline; }
+
+/* Horizontal rule — pillar separator */
+#articleBody hr {
+  border: none; border-top: 1px solid var(--black-border);
+  margin: 2.5rem 0;
+}
+
+/* Blockquote — CTA style */
+#articleBody blockquote {
+  border-left: 3px solid var(--gold);
+  padding: 1.1rem 1.5rem;
+  margin: 2rem 0;
+  background: var(--gold-muted);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+#articleBody blockquote p {
+  color: var(--white); margin: 0; font-size: 1rem; line-height: 1.75;
+}
+
+/* Code */
+#articleBody code {
+  background: var(--black-soft); padding: .15rem .4rem;
+  border-radius: 2px; font-family: var(--font-mono);
+  font-size: .82em; color: var(--gold-light);
+}
+#articleBody pre {
+  background: var(--black-soft); border: 1px solid var(--black-border);
+  border-radius: var(--radius); padding: 1.25rem;
+  overflow-x: auto; margin: 1.25rem 0;
+}
 </style>
 
 <script>
@@ -160,8 +214,9 @@ function resolvePost(p) {
     emoji:     p.emoji      || '📝',
     featImg:   p.featuredImg || p.featuredImage || p.image || '',
     status:    p.status     || 'Published',  // legacy posts have no status — treat as published
-    tags:      p.tags       || [],
-    raw:       p
+    tags:        p.tags        || [],
+    attachments: p.attachments || [],
+    raw:         p
   };
 }
 
@@ -247,15 +302,12 @@ function openArticle(slug) {
 
   const p = resolvePost(raw);
 
-  // Render body: HTML content goes in via innerHTML, plain text gets wrapped in <p>
+  // Render body: HTML content goes in via innerHTML, plain text gets rich formatting
   let bodyHtml = '';
   if (p.content.trim().startsWith('<')) {
     bodyHtml = p.content;
   } else if (p.content.trim()) {
-    bodyHtml = p.content.split('\n')
-      .filter(l => l.trim())
-      .map(l => `<p>${l}</p>`)
-      .join('');
+    bodyHtml = renderPlainText(p.content);
   }
 
   // Featured image
@@ -282,6 +334,19 @@ function openArticle(slug) {
     <div id="articleBody" style="font-size:0.95rem;line-height:1.85;">
       ${bodyHtml || '<p>No content available.</p>'}
     </div>
+    ${p.attachments && p.attachments.length ? `
+    <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--black-border);">
+      <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:0.75rem;">Downloads</div>
+      ${p.attachments.map(a => `
+        <a href="${a.data || '#'}" download="${a.name || 'file'}" style="display:flex;align-items:center;gap:1rem;background:var(--black);border:1px solid var(--black-border);border-radius:var(--radius);padding:0.75rem 1rem;margin-bottom:0.5rem;text-decoration:none;transition:border-color 0.2s;">
+          <span style="font-size:1.4rem;flex-shrink:0;">${a.name && a.name.endsWith('.pdf') ? '📄' : a.name && (a.name.endsWith('.doc')||a.name.endsWith('.docx')) ? '📝' : a.name && (a.name.endsWith('.xls')||a.name.endsWith('.xlsx')) ? '📊' : a.name && (a.name.endsWith('.ppt')||a.name.endsWith('.pptx')) ? '📋' : a.name && a.name.endsWith('.zip') ? '🗜️' : '📁'}</span>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:0.85rem;color:var(--white);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.name || 'Download'}</div>
+            <div style="font-size:0.7rem;color:var(--white-muted);font-family:var(--font-mono);">${a.size ? (a.size < 1048576 ? (a.size/1024).toFixed(1)+' KB' : (a.size/1048576).toFixed(1)+' MB') : ''}</div>
+          </div>
+          <span style="color:var(--gold);font-size:0.8rem;white-space:nowrap;flex-shrink:0;">⬇ Download</span>
+        </a>`).join('')}
+    </div>` : ''}
     <div style="margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--black-border);">
       <p style="margin-bottom:1rem;">Need legal advice on this topic?</p>
       <a href="contact.html" class="btn btn-gold">Book a Free Consultation</a>
@@ -289,6 +354,120 @@ function openArticle(slug) {
 
   document.getElementById('articleModal').style.display = 'block';
   document.body.style.overflow = 'hidden';
+}
+
+/* ─── PLAIN TEXT → RICH HTML RENDERER ───────────────────────
+   Converts structured plain text (as pasted into CMS) into
+   formatted HTML matching the site's visual style.
+   Handles: PILLAR XX headings, ALL-CAPS subheadings,
+   bullet points, blank-line paragraphs.                       */
+function renderPlainText(text) {
+  if (!text) return '';
+  const lines = text.split('\n');
+  let html = '';
+  let inList = false;
+  let inParagraph = false;
+
+  function closeParagraph() {
+    if (inParagraph) { html += '</p>'; inParagraph = false; }
+  }
+  function closeList() {
+    if (inList) { html += '</ul>'; inList = false; }
+  }
+
+  lines.forEach(raw => {
+    const line = raw.trimEnd();
+    const trimmed = line.trim();
+
+    // ── Blank line: close current block ──────────────────────
+    if (!trimmed) {
+      closeParagraph();
+      closeList();
+      return;
+    }
+
+    // ── PILLAR XX — Title pattern ─────────────────────────────
+    // Matches: "PILLAR 01 — Jurisdiction: Choosing Your Legal Home"
+    if (/^PILLAR\s+\d+\s*[—\-–]/i.test(trimmed)) {
+      closeParagraph(); closeList();
+      const dashIdx = trimmed.search(/[—\-–]/);
+      const num = trimmed.slice(0, dashIdx).trim();        // "PILLAR 01"
+      const title = trimmed.slice(dashIdx + 1).trim();     // "Jurisdiction: ..."
+      html += `<div style="margin:2.5rem 0 1rem;">
+        <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:0.3rem;">${num}</div>
+        <h2 style="font-family:var(--font-display);font-size:1.4rem;color:var(--white);padding-bottom:0.5rem;border-bottom:1px solid var(--black-border);margin:0;">${title}</h2>
+      </div>`;
+      return;
+    }
+
+    // ── ALL-CAPS short line = h3 subheading ───────────────────
+    // e.g. "VASP and MSB Licensing —" or "Banking Partners —"
+    // Must be all caps, under 80 chars, not starting with digit
+    if (
+      trimmed === trimmed.toUpperCase() &&
+      trimmed.length > 3 &&
+      trimmed.length < 80 &&
+      !/^\d/.test(trimmed) &&
+      /[A-Z]/.test(trimmed)
+    ) {
+      closeParagraph(); closeList();
+      // Clean trailing dashes/colons
+      const heading = trimmed.replace(/[\-—:]+$/, '').trim();
+      html += `<h3 style="font-family:var(--font-display);font-size:1.05rem;color:var(--gold);margin:1.75rem 0 0.5rem;">${heading}</h3>`;
+      return;
+    }
+
+    // ── Named subheadings: "Word Word — description" format ───
+    // e.g. "Regulatory Clarity — Does the country..."
+    // e.g. "Banking Partners — Securing a crypto-friendly..."
+    // Detect: starts with 1-4 Title Case words, then " — "
+    if (/^[A-Z][A-Za-z&\/]+(\s[A-Z][A-Za-z&\/]+){0,4}\s+[—\-–]/.test(trimmed)) {
+      const dashIdx = trimmed.search(/\s+[—\-–]\s+/);
+      if (dashIdx > 0 && dashIdx < 50) {
+        closeParagraph(); closeList();
+        const label = trimmed.slice(0, dashIdx).trim();
+        const desc  = trimmed.slice(dashIdx).replace(/^[\s—\-–]+/, '').trim();
+        html += `<p style="margin:0.75rem 0;"><strong style="color:var(--white);">${label}</strong> — ${desc}</p>`;
+        return;
+      }
+    }
+
+    // ── Bullet point ──────────────────────────────────────────
+    if (/^[•\-\*]\s/.test(trimmed)) {
+      closeParagraph();
+      if (!inList) {
+        html += '<ul style="list-style:none;padding:0;margin:0.75rem 0;">';
+        inList = true;
+      }
+      const item = trimmed.replace(/^[•\-\*]\s+/, '');
+      html += `<li style="display:flex;gap:0.6rem;align-items:flex-start;margin-bottom:0.4rem;color:var(--white-muted);">
+        <span style="color:var(--gold);flex-shrink:0;margin-top:0.15rem;">›</span>
+        <span>${item}</span>
+      </li>`;
+      return;
+    }
+
+    // ── "Ready to Build..." style CTA heading ─────────────────
+    if (/^ready to/i.test(trimmed)) {
+      closeParagraph(); closeList();
+      html += `<h2 style="font-family:var(--font-display);font-size:1.3rem;color:var(--white);margin:2.5rem 0 0.75rem;padding-top:2rem;border-top:1px solid var(--black-border);">${trimmed}</h2>`;
+      return;
+    }
+
+    // ── Regular paragraph text ────────────────────────────────
+    closeList();
+    if (!inParagraph) {
+      html += '<p style="margin:0.75rem 0;color:var(--white-muted);line-height:1.85;">';
+      inParagraph = true;
+    } else {
+      html += ' '; // continuation — same paragraph
+    }
+    html += trimmed;
+  });
+
+  closeParagraph();
+  closeList();
+  return html;
 }
 
 /* ─── CLOSE MODAL ────────────────────────────────────────────  */
