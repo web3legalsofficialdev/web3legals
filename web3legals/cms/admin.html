@@ -2232,7 +2232,7 @@ function migrateToD1() {
   .then(data => {
     if (data.ok) {
       statusEl.style.color = '#2ecc71';
-      statusEl.textContent = '✅ Done! ' + posts.length + ' posts, ' + pages.length + ' pages, ' + users.length + ' users exported to D1.';
+      statusEl.textContent = '✅ Done! ' + posts.length + ' posts, ' + pages.length + ' pages, ' + media.length + ' media files, ' + users.length + ' users exported to D1.';
       showToast('Export complete ✓', 'success');
     } else {
       statusEl.style.color = '#e74c3c';
