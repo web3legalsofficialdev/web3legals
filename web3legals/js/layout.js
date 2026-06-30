@@ -80,7 +80,7 @@ function injectLayout() {
             <li><a href="${prefix}pages/research.html">Research Papers</a></li>
             <li><a href="${prefix}pages/crypto-countries.html">Crypto Countries</a></li>
             <li><a href="${prefix}pages/compliance.html">Compliance Hub</a></li>
-            <li><a href="${prefix}pages/resources.html">Free Web3legals Guides & PDFs</a></li>
+            <li><a href="${prefix}pages/resources.html">Web3Legals PDF Library</a></li>
           </ul>
         </div>
         <div class="footer-col">
