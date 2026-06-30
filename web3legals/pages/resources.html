@@ -124,14 +124,23 @@ async function loadResources() {
   const noResEl = document.getElementById('noResources');
 
   let posts = [];
+  let media = [];
   try {
     const r = await fetch(D1_API + '/api/posts');
     if (r.ok) posts = await r.json();
   } catch(e) { posts = []; }
 
+  try {
+    const m = await fetch(D1_API + '/api/media');
+    if (m.ok) media = await m.json();
+  } catch(e) { media = []; }
+
   // Fallback to localStorage cache if API fails
   if (!posts.length) {
     try { posts = JSON.parse(localStorage.getItem('w3l_posts') || '[]'); } catch(e) { posts = []; }
+  }
+  if (!media.length) {
+    try { media = JSON.parse(localStorage.getItem('w3l_media') || '[]'); } catch(e) { media = []; }
   }
 
   // Collect every attachment from every published post, tagging it with
@@ -151,6 +160,27 @@ async function loadResources() {
         category: p.category || p.cat || 'General',
         date: p.date || p.updatedAt || ''
       });
+    });
+  });
+
+  // Also include every file uploaded to the Media Library directly —
+  // independent of whether it's attached to any blog post. Only list
+  // document-type files (skip images, which are typically used as
+  // featured images / thumbnails rather than standalone downloads).
+  const docExtensions = ['pdf','doc','docx','xls','xlsx','ppt','pptx','zip'];
+  media.forEach(m => {
+    const name = m.name || '';
+    const ext = name.toLowerCase().split('.').pop();
+    if (!docExtensions.includes(ext)) return; // skip images etc.
+    resources.push({
+      name: name || 'Untitled file',
+      size: m.size || 0,
+      data: m.data || '#',
+      type: m.type || '',
+      postTitle: '',          // not tied to a post
+      postSlug: '',
+      category: 'Resource',
+      date: m.uploadedAt || ''
     });
   });
 
