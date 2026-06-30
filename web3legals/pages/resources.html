@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free Resources & Guides — Web3Legals | Crypto Compliance PDFs</title>
+  <meta name="description" content="Download free legal guides, compliance checklists, and jurisdiction-specific frameworks for launching and operating cryptocurrency exchanges and Web3 businesses.">
+  <link rel="canonical" href="https://web3legals-e7b.pages.dev/pages/resources.html">
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/layout.js" defer></script>
+</head>
+<body>
+<main style="padding-top:70px;">
+
+<section style="background:var(--black-soft);border-bottom:1px solid var(--black-border);padding:4rem 0 3rem;">
+  <div class="container">
+    <div class="breadcrumb"><a href="../index.html">Home</a><span class="sep">›</span><span>Resources</span></div>
+    <span class="section-label">Free Downloads</span>
+    <h1>Resources & Guides</h1>
+    <div class="divider"></div>
+    <p style="max-width:600px;">Free legal guides, compliance checklists, and jurisdiction-specific frameworks for launching and operating cryptocurrency exchanges and Web3 businesses — written by our legal team.</p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div id="resourcesGrid" class="grid-3"></div>
+    <div id="noResources" style="display:none;text-align:center;padding:4rem 1rem;">
+      <p style="color:var(--white-muted);">No resources available yet. Check back soon.</p>
+    </div>
+    <div id="loadingState" style="text-align:center;padding:4rem 1rem;">
+      <p style="color:var(--white-muted);">Loading resources…</p>
+    </div>
+  </div>
+</section>
+
+<section style="border-top:1px solid var(--black-border);padding:3rem 0;margin-top:2rem;">
+  <div class="container" style="text-align:center;">
+    <p style="margin-bottom:1rem;color:var(--white-muted);">Need a guide for a jurisdiction not listed here?</p>
+    <a href="contact.html" class="btn btn-gold">Book a Free Consultation</a>
+  </div>
+</section>
+
+<style>
+.resource-card {
+  background: var(--black-card);
+  border: 1px solid var(--black-border);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  transition: border-color var(--transition);
+}
+.resource-card:hover { border-color: var(--gold); }
+.resource-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+.resource-card h3 {
+  font-size: 1.05rem;
+  color: var(--white);
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+.resource-card p {
+  color: var(--white-muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+  flex-grow: 1;
+}
+.resource-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--white-muted);
+  font-family: var(--font-mono);
+  margin-bottom: 1rem;
+}
+.resource-download-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--gold-muted);
+  border: 1px solid var(--gold-dark);
+  color: var(--gold);
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all var(--transition);
+}
+.resource-download-btn:hover {
+  background: var(--gold);
+  color: var(--black);
+}
+</style>
+
+<script>
+const D1_API = 'https://web3legals-api.web3legalsofficialdev.workers.dev';
+
+/* ─── ICON BY FILE TYPE ─────────────────────────────────────── */
+function fileIcon(name) {
+  if (!name) return '📁';
+  const ext = name.toLowerCase().split('.').pop();
+  const map = { pdf:'📄', doc:'📝', docx:'📝', xls:'📊', xlsx:'📊', ppt:'📋', pptx:'📋', zip:'🗜️' };
+  return map[ext] || '📁';
+}
+
+/* ─── FILE SIZE FORMAT ──────────────────────────────────────── */
+function fmtSize(bytes) {
+  if (!bytes) return '';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+/* ─── COLLECT ALL ATTACHMENTS FROM ALL PUBLISHED POSTS ──────── */
+async function loadResources() {
+  const loadingEl = document.getElementById('loadingState');
+  const gridEl = document.getElementById('resourcesGrid');
+  const noResEl = document.getElementById('noResources');
+
+  let posts = [];
+  try {
+    const r = await fetch(D1_API + '/api/posts');
+    if (r.ok) posts = await r.json();
+  } catch(e) { posts = []; }
+
+  // Fallback to localStorage cache if API fails
+  if (!posts.length) {
+    try { posts = JSON.parse(localStorage.getItem('w3l_posts') || '[]'); } catch(e) { posts = []; }
+  }
+
+  // Collect every attachment from every published post, tagging it with
+  // the parent post's title/slug/category so the card can link back.
+  const resources = [];
+  posts.forEach(p => {
+    if (p.status !== 'Published') return;
+    if (!p.attachments || !p.attachments.length) return;
+    p.attachments.forEach(a => {
+      resources.push({
+        name: a.name || 'Untitled file',
+        size: a.size || 0,
+        data: a.data || '#',
+        type: a.type || '',
+        postTitle: p.title || '',
+        postSlug: p.slug || p.id || '',
+        category: p.category || p.cat || 'General',
+        date: p.date || p.updatedAt || ''
+      });
+    });
+  });
+
+  loadingEl.style.display = 'none';
+
+  if (!resources.length) {
+    noResEl.style.display = 'block';
+    return;
+  }
+
+  // De-duplicate by name+size (same PDF can be attached to multiple posts)
+  const seen = new Set();
+  const unique = resources.filter(r => {
+    const key = r.name + '|' + r.size;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  gridEl.innerHTML = unique.map(r => `
+    <div class="resource-card">
+      <div class="resource-icon">${fileIcon(r.name)}</div>
+      <h3>${r.name.replace(/\.(pdf|docx?|xlsx?|pptx?|zip)$/i, '')}</h3>
+      <p>${r.postTitle ? 'From: ' + r.postTitle : 'Legal compliance guide and reference document.'}</p>
+      <div class="resource-meta">
+        <span>${r.category}</span>
+        <span>${fmtSize(r.size)}</span>
+      </div>
+      <a href="${r.data}" download="${r.name}" class="resource-download-btn">
+        ⬇ Download ${r.name.split('.').pop().toUpperCase()}
+      </a>
+    </div>
+  `).join('');
+}
+
+document.addEventListener('DOMContentLoaded', loadResources);
+</script>
+
+</main>
+</body>
+</html>
