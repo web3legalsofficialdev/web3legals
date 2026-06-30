@@ -248,7 +248,7 @@ function resolvePost(p) {
 let currentFilter = 'All';
 
 /* ─── RENDER BLOG GRID ───────────────────────────────────────  */
-function renderBlog(filter) {
+async function renderBlog(filter) {
   currentFilter = filter;
   const grid      = document.getElementById('blogGrid');
   const noResults = document.getElementById('noResults');
