@@ -6,6 +6,31 @@
   <title>Blog — Web3Legals | Crypto Law & Regulation Articles</title>
   <meta name="description" content="Expert articles on crypto regulation, blockchain law, DeFi compliance, NFT legality, and global Web3 regulatory updates from Web3Legals.">
   <link rel="canonical" href="https://web3legals.com/pages/blog.html">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Web3Legals">
+  <meta property="og:title" content="Blog — Web3Legals | Crypto Law & Regulation Articles">
+  <meta property="og:description" content="Expert articles on crypto regulation, blockchain law, DeFi compliance, NFT legality, and global Web3 regulatory updates from Web3Legals.">
+  <meta property="og:url" content="https://web3legals.com/pages/blog.html">
+  <meta property="og:image" content="https://web3legals.com/og-image.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@web3legals">
+  <meta name="twitter:title" content="Blog — Web3Legals | Crypto Law & Regulation Articles">
+  <meta name="twitter:description" content="Expert articles on crypto regulation, blockchain law, DeFi compliance, NFT legality, and global Web3 regulatory updates from Web3Legals.">
+  <meta name="twitter:image" content="https://web3legals.com/og-image.png">
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-616QFX5K89"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-616QFX5K89');
+  </script>
+
   <link rel="stylesheet" href="../css/style.css">
   <script src="../js/layout.js" defer></script>
 </head>
@@ -136,6 +161,14 @@
 </style>
 
 <script>
+/* ─── INJECT SEO DEFAULTS FROM CMS SETTINGS ─────────────────
+   Reads w3l_settings from localStorage (saved by admin.html)
+   and injects GA, OG image, Twitter Card meta tags into <head>.
+   Completely standalone — does not touch any other function.   */
+/* ─── SEO DEFAULTS ───────────────────────────────────────────
+   These values are baked into the file directly so they work
+   for every visitor — not just the admin's browser.          */
+
 /* ─── API CONFIG ────────────────────────────────────────────── */
 const BLOG_API = ''; // Auto-detects: same origin as blog page
 
