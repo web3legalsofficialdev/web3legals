@@ -127,30 +127,56 @@
 
 </main>
 <script>
-document.getElementById('contactForm').addEventListener('submit', function(e) {
+document.getElementById('contactForm').addEventListener('submit', async function(e) {
   e.preventDefault();
+  const btn = this.querySelector('button[type="submit"]');
   const name = document.getElementById('name').value;
   const email = document.getElementById('email').value;
+  const company = document.getElementById('company').value;
+  const service = document.getElementById('service').value;
   const message = document.getElementById('message').value;
 
-  // Build mailto link
-  const subject = encodeURIComponent('Web3Legals Enquiry - ' + name);
-  const body = encodeURIComponent(
-    'Name: ' + name + '\nEmail: ' + email +
-    '\nCompany: ' + document.getElementById('company').value +
-    '\nService: ' + document.getElementById('service').value +
-    '\n\nMessage:\n' + message
-  );
-  window.location.href = 'mailto:web3legal@gmail.com?subject=' + subject + '&body=' + body;
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
 
-  showToast('Opening your email client... Thank you, ' + name + '!');
-  this.reset();
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        access_key: '02332855-7a72-4c16-9e50-32436b82f3ef',
+        subject: 'Web3Legals Enquiry — ' + name,
+        from_name: name,
+        name: name,
+        email: email,
+        company: company || 'Not provided',
+        service: service || 'Not specified',
+        message: message,
+        redirect: 'false'
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast("Message sent! We'll be in touch within 24 hours.", "success");
+      this.reset();
+    } else {
+      showToast('Something went wrong. Please email web3legal@gmail.com directly.', 'error');
+    }
+  } catch(err) {
+    showToast('Could not send. Please email web3legal@gmail.com directly.', 'error');
+  }
+
+  btn.textContent = 'Send Message →';
+  btn.disabled = false;
 });
-function showToast(msg) {
+
+function showToast(msg, type) {
   let t = document.querySelector('.toast');
   if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t);}
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3500);
+  t.textContent = msg;
+  t.style.background = type === 'error' ? '#c0392b' : '';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 4000);
 }
 </script>
 </body>
